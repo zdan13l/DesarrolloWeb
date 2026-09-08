@@ -11,14 +11,9 @@ public class Categoria {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
-    private String apellido;
+    @Column(nullable = true)
+    private String descripcion;
 
-    @Column(nullable = false, unique = true)
-    private String correo;
-
-    @Column(nullable = false)
-    private boolean activo = true;
 
 
 
@@ -38,28 +33,12 @@ public class Categoria {
         this.nombre = nombre;
     }
 
-    public String getApellido() {
-        return apellido;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
 }
