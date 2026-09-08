@@ -1,4 +1,7 @@
 package com.sistema.gestion.sistema_gestion_api.modules.recurso.repository;
 
-public interface RecursoRepository {
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.Recurso;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RecursoRepository extends JpaRepository<Recurso, Long> {
 }
