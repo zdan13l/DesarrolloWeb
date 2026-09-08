@@ -1,6 +1,12 @@
 package com.sistema.gestion.sistema_gestion_api.modules.usuario.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Usuario {
@@ -20,11 +26,9 @@ public class Usuario {
     @Column(nullable = false)
     private boolean activo = true;
 
-    @Column(name = "rol_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "rol_id")
     private Rol rol;
-
-
-
 
 
 

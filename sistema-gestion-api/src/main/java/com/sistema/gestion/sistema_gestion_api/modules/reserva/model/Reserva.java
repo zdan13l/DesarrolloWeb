@@ -21,6 +21,7 @@ public class Reserva {
     @Column(name = "fecha_creacion", nullable = false)
     private Instant fechaCreacion;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private EstadoReserva estadoReserva;
 

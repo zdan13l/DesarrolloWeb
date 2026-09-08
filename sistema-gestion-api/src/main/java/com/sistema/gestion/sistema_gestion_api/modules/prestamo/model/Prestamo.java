@@ -24,9 +24,11 @@ public class Prestamo {
     private Instant fechaHoraDevolucion;
 
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado_inicial", nullable = false)
     private EstadoFisico estadoInicial;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado_final", nullable = false)
     private EstadoFisico estadoFinal;
 
@@ -36,6 +38,7 @@ public class Prestamo {
     @Column(nullable = false)
     private String accesorios;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private EstadoPrestamo estadoPrestamo;
 

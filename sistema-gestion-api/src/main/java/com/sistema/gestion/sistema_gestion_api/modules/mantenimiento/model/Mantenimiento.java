@@ -17,6 +17,7 @@ public class Mantenimiento {
     @Column(nullable = false)
     private Instant fechaCierre;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private EstadoMantenimiento estadoMantenimiento;
 

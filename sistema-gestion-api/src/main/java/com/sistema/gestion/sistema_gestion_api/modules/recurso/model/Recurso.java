@@ -13,6 +13,7 @@ public class Recurso {
     @Column(nullable = false)
     private String nombre;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false)
     private TipoRecurso tipoRecurso;
 
@@ -22,9 +23,11 @@ public class Recurso {
     @Column(nullable = false)
     private String caracteristicas;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "modalidad", nullable = false)
     private ModalidadRecurso modalidadRecurso;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado_operativo", nullable = false)
     private EstadoOperativo estadoOperativo;
 
