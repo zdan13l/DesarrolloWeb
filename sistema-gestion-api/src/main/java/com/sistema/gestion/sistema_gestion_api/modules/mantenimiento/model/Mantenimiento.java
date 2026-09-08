@@ -1,0 +1,4 @@
+package com.sistema.gestion.sistema_gestion_api.modules.mantenimiento.model;
+
+public class Mantenimiento {
+}
