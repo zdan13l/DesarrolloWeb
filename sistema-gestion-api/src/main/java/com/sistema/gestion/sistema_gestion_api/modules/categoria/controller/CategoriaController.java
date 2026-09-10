@@ -20,6 +20,7 @@ public class CategoriaController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<CategoriaResponseDTO> listar(@RequestParam(required = false) String nombre) {
         if (nombre != null && !nombre.isBlank()) {
             return categoriaService.buscarPorNombre(nombre);
@@ -28,6 +29,7 @@ public class CategoriaController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public CategoriaResponseDTO obtener(@PathVariable Long id) {
         return categoriaService.obtenerPorId(id);
     }
@@ -39,6 +41,7 @@ public class CategoriaController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public CategoriaResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO dto) {
         return categoriaService.actualizar(id, dto);
     }

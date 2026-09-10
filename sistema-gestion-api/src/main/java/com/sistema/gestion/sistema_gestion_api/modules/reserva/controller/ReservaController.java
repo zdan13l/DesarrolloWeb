@@ -20,6 +20,7 @@ public class ReservaController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<ReservaResponseDTO> listar(
             @RequestParam(required = false) Long recursoId,
             @RequestParam(required = false) Long usuarioId) {
@@ -33,6 +34,7 @@ public class ReservaController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public ReservaResponseDTO obtener(@PathVariable Long id) {
         return reservaService.obtenerPorId(id);
     }
@@ -44,6 +46,7 @@ public class ReservaController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public ReservaResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody ReservaRequestDTO dto) {
         return reservaService.actualizar(id, dto);
     }

@@ -20,6 +20,7 @@ public class IncidenteController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<IncidenteResponseDTO> listar(@RequestParam(required = false) Long recursoId) {
         if (recursoId != null) {
             return incidenteService.buscarPorRecurso(recursoId);
@@ -28,6 +29,7 @@ public class IncidenteController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public IncidenteResponseDTO obtener(@PathVariable Long id) {
         return incidenteService.obtenerPorId(id);
     }
@@ -39,6 +41,7 @@ public class IncidenteController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public IncidenteResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody IncidenteRequestDTO dto) {
         return incidenteService.actualizar(id, dto);
     }

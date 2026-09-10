@@ -22,6 +22,7 @@ public class RecursoController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<RecursoResponseDTO> listar(
             @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) Long ubicacionId,
@@ -31,6 +32,7 @@ public class RecursoController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public RecursoResponseDTO obtener(@PathVariable Long id) {
         return recursoService.obtenerPorId(id);
     }
@@ -42,6 +44,7 @@ public class RecursoController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public RecursoResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody RecursoRequestDTO dto) {
         return recursoService.actualizar(id, dto);
     }

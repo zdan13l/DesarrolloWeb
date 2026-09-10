@@ -20,6 +20,7 @@ public class PrestamoController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<PrestamoResponseDTO> listar(
             @RequestParam(required = false) Long recursoId,
             @RequestParam(required = false) Long usuarioId,
@@ -37,6 +38,7 @@ public class PrestamoController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public PrestamoResponseDTO obtener(@PathVariable Long id) {
         return prestamoService.obtenerPorId(id);
     }
@@ -48,6 +50,7 @@ public class PrestamoController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public PrestamoResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody PrestamoRequestDTO dto) {
         return prestamoService.actualizar(id, dto);
     }

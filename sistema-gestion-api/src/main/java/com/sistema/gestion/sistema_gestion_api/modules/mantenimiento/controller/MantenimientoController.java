@@ -20,6 +20,7 @@ public class MantenimientoController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<MantenimientoResponseDTO> listar(@RequestParam(required = false) Long recursoId) {
         if (recursoId != null) {
             return mantenimientoService.buscarPorRecurso(recursoId);
@@ -28,6 +29,7 @@ public class MantenimientoController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public MantenimientoResponseDTO obtener(@PathVariable Long id) {
         return mantenimientoService.obtenerPorId(id);
     }
@@ -39,6 +41,7 @@ public class MantenimientoController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public MantenimientoResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody MantenimientoRequestDTO dto) {
         return mantenimientoService.actualizar(id, dto);
     }

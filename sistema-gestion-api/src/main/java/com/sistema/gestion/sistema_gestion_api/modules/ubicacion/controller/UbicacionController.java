@@ -20,6 +20,7 @@ public class UbicacionController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<UbicacionResponseDTO> listar(@RequestParam(required = false) String edificio) {
         if (edificio != null && !edificio.isBlank()) {
             return ubicacionService.buscarPorEdificio(edificio);
@@ -28,6 +29,7 @@ public class UbicacionController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public UbicacionResponseDTO obtener(@PathVariable Long id) {
         return ubicacionService.obtenerPorId(id);
     }
@@ -39,6 +41,7 @@ public class UbicacionController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public UbicacionResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody UbicacionRequestDTO dto) {
         return ubicacionService.actualizar(id, dto);
     }

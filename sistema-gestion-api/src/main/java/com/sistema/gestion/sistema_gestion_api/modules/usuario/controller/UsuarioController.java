@@ -32,6 +32,7 @@ public class UsuarioController {
 
     //TODO: Nidea si sea necesario pero si alguno lo hace ya en una vaina de trabajo, mejor dele el trabajo a chat (q peligro tan hp)
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<UsuarioResponseDTO> listar(@RequestParam(required = false) Boolean activos) {
         if (Boolean.TRUE.equals(activos)) {
             return usuarioService.listarActivos();
@@ -40,6 +41,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public UsuarioResponseDTO obtener(@PathVariable Long id) {
         return usuarioService.obtenerPorId(id);
     }
@@ -51,6 +53,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public UsuarioResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody UsuarioRequestDTO dto) {
         return usuarioService.actualizar(id, dto);
     }
