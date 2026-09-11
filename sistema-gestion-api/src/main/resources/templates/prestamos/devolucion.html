@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar devolución · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='prestamos-devolucion')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Préstamos / <strong>Registrar devolución</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Registrar devolución de recurso</h1>
+          <p>Confirma las condiciones de entrega del dispositivo o espacio prestado.</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 640px;">
+        <div id="alert" class="alert error"></div>
+        <form id="form-devolucion">
+          <div class="field">
+            <label>Préstamo activo</label>
+            <select id="prestamoId" required></select>
+          </div>
+          <div class="field">
+            <label>Fecha y hora de devolución</label>
+            <input type="datetime-local" id="fechaHoraDevolucion" required>
+          </div>
+          <div class="field">
+            <label>Estado final del recurso</label>
+            <select id="estadoFinal" required>
+              <option value="BUENO">Bueno</option>
+              <option value="REGULAR">Regular</option>
+              <option value="DANADO">Dañado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Observaciones</label>
+            <textarea id="observaciones" placeholder="Detalles del estado del recurso al devolver..." required></textarea>
+          </div>
+          <div class="form-actions">
+            <a class="btn" href="/prestamos/activos">Cancelar</a>
+            <button type="submit" class="btn primary">Registrar devolución</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  let prestamos = [];
+
+  async function init() {
+    prestamos = (await api.get('/prestamos')).filter(p => p.estadoPrestamo === 'ACTIVO');
+    fillSelect(document.getElementById('prestamoId'), prestamos, 'id',
+      p => p.recursoNombre + ' — ' + p.usuarioNombre,
+      'Seleccionar préstamo');
+  }
+
+  document.getElementById('form-devolucion').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('prestamoId').value;
+    if (!id) {
+      showAlert(document.getElementById('alert'), 'Selecciona un préstamo.', 'error');
+      return;
+    }
+    try {
+      const actual = await api.get('/prestamos/' + id);
+      const payload = {
+        recursoId: actual.recursoId,
+        usuarioId: actual.usuarioId,
+        reservaId: actual.reservaId,
+        fechaHoraEntrega: actual.fechaHoraEntrega,
+        fechaHoraLimite: actual.fechaHoraLimite,
+        fechaHoraDevolucion: fromDatetimeLocalValue(document.getElementById('fechaHoraDevolucion').value),
+        estadoInicial: actual.estadoInicial,
+        estadoFinal: document.getElementById('estadoFinal').value,
+        estadoPrestamo: 'DEVUELTO',
+        accesorios: actual.accesorios,
+        observaciones: document.getElementById('observaciones').value,
+      };
+      await api.put('/prestamos/' + id, payload);
+      location.href = '/prestamos/activos';
+    } catch (err) {
+      showAlert(document.getElementById('alert'), err.message, 'error');
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>

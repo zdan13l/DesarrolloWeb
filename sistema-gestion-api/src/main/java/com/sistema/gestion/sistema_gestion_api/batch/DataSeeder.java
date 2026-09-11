@@ -23,7 +23,9 @@ import com.sistema.gestion.sistema_gestion_api.modules.reserva.model.Reserva;
 import com.sistema.gestion.sistema_gestion_api.modules.reserva.repository.ReservaRepository;
 import com.sistema.gestion.sistema_gestion_api.modules.ubicacion.model.Ubicacion;
 import com.sistema.gestion.sistema_gestion_api.modules.ubicacion.repository.UbicacionRepository;
+import com.sistema.gestion.sistema_gestion_api.modules.usuario.model.Rol;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.model.Usuario;
+import com.sistema.gestion.sistema_gestion_api.modules.usuario.repository.RolRepository;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.repository.UsuarioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,7 @@ public class DataSeeder implements CommandLineRunner {
     private final CategoriaRepository categoriaRepository;
     private final UbicacionRepository ubicacionRepository;
     private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
     private final RecursoRepository recursoRepository;
     private final ReservaRepository reservaRepository;
     private final PrestamoRepository prestamoRepository;
@@ -50,6 +53,7 @@ public class DataSeeder implements CommandLineRunner {
     public DataSeeder(CategoriaRepository categoriaRepository,
                        UbicacionRepository ubicacionRepository,
                        UsuarioRepository usuarioRepository,
+                       RolRepository rolRepository,
                        RecursoRepository recursoRepository,
                        ReservaRepository reservaRepository,
                        PrestamoRepository prestamoRepository,
@@ -58,6 +62,7 @@ public class DataSeeder implements CommandLineRunner {
         this.categoriaRepository = categoriaRepository;
         this.ubicacionRepository = ubicacionRepository;
         this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
         this.recursoRepository = recursoRepository;
         this.reservaRepository = reservaRepository;
         this.prestamoRepository = prestamoRepository;
@@ -80,9 +85,13 @@ public class DataSeeder implements CommandLineRunner {
         Ubicacion edB204 = ubicacion("Laboratorio 204", "Edificio B", 2, "Laboratorio de sistemas");
         Ubicacion bodega = ubicacion("Bodega de equipos", "Edificio A", 0, "Almacén de préstamos");
 
-        Usuario docente = usuario("Ana", "Martínez", "ana.martinez@campus.edu");
-        Usuario estudiante = usuario("Luis", "Pérez", "luis.perez@campus.edu");
-        Usuario gestor = usuario("Camila", "Rojas", "camila.rojas@campus.edu");
+        Rol rolSolicitante = rol("Solicitante");
+        Rol rolGestor = rol("Gestor de recursos");
+        Rol rolAdministrador = rol("Administrador");
+
+        Usuario docente = usuario("Ana", "Martínez", "ana.martinez@campus.edu", rolSolicitante);
+        Usuario estudiante = usuario("Luis", "Pérez", "luis.perez@campus.edu", rolSolicitante);
+        Usuario gestor = usuario("Camila", "Rojas", "camila.rojas@campus.edu", rolGestor);
 
         Recurso aula101 = recurso("Aula 101", TipoRecurso.ESPACIO, "Aula estándar con proyector",
                 "Capacidad 40, tablero, proyector", ModalidadRecurso.RESERVABLE,
@@ -143,12 +152,19 @@ public class DataSeeder implements CommandLineRunner {
         return ubicacionRepository.save(u);
     }
 
-    private Usuario usuario(String nombre, String apellido, String correo) {
+    private Rol rol(String nombre) {
+        Rol r = new Rol();
+        r.setNombre(nombre);
+        return rolRepository.save(r);
+    }
+
+    private Usuario usuario(String nombre, String apellido, String correo, Rol rol) {
         Usuario u = new Usuario();
         u.setNombre(nombre);
         u.setApellido(apellido);
         u.setCorreo(correo);
         u.setActivo(true);
+        u.setRol(rol);
         return usuarioRepository.save(u);
     }
 

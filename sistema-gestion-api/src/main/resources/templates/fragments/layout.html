@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="sidebar(active)" class="sidebar">
+  <div class="brand">
+    <span class="logo">PR</span>
+    <span>PontiReservas</span>
+  </div>
+
+  <div class="section-label">Principal</div>
+  <nav>
+    <a href="/" th:classappend="${active == 'inicio'} ? 'active'">Inicio</a>
+  </nav>
+
+  <div class="section-label">Recursos</div>
+  <nav>
+    <a href="/recursos" th:classappend="${active == 'recursos'} ? 'active'">Catálogo</a>
+    <a href="/categorias" th:classappend="${active == 'categorias'} ? 'active'">Categorías</a>
+    <a href="/ubicaciones" th:classappend="${active == 'ubicaciones'} ? 'active'">Ubicaciones</a>
+  </nav>
+
+  <div class="section-label">Reservas</div>
+  <nav>
+    <a href="/reservas/nueva" th:classappend="${active == 'reservas-nueva'} ? 'active'">Nueva reserva</a>
+    <a href="/reservas" th:classappend="${active == 'reservas'} ? 'active'">Listado</a>
+  </nav>
+
+  <div class="section-label">Préstamos</div>
+  <nav>
+    <a href="/prestamos/activos" th:classappend="${active == 'prestamos-activos'} ? 'active'">Activos</a>
+    <a href="/prestamos/entrega" th:classappend="${active == 'prestamos-entrega'} ? 'active'">Registrar entrega</a>
+    <a href="/prestamos/devolucion" th:classappend="${active == 'prestamos-devolucion'} ? 'active'">Registrar devolución</a>
+  </nav>
+
+  <div class="section-label">Incidentes</div>
+  <nav>
+    <a href="/incidentes/reportar" th:classappend="${active == 'incidentes-reportar'} ? 'active'">Reportar</a>
+    <a href="/incidentes" th:classappend="${active == 'incidentes'} ? 'active'">Incidentes</a>
+  </nav>
+
+  <div class="user-box">
+    <span class="avatar">AC</span>
+    <div>
+      <div><strong>Admin Campus</strong></div>
+      <div style="color:var(--text-muted)">Área de Operaciones</div>
+    </div>
+  </div>
+</div>
+
+<div th:fragment="topbar(crumbs)" class="topbar">
+  <div class="crumbs" th:utext="${crumbs}"></div>
+  <div class="search">Buscar recurso, reserva, número de serie...</div>
+  <div class="profile">
+    <span class="avatar">AC</span>
+  </div>
+</div>
+
+</body>
+</html>

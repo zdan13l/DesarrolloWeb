@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Nueva reserva · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='reservas-nueva')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Reservas / <strong>Nueva reserva</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Nueva reserva</h1>
+          <p>Complete el formulario para solicitar o programar un recurso del campus.</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 640px;">
+        <div id="alert" class="alert error"></div>
+        <form id="form-reserva">
+          <div class="field">
+            <label>Recurso</label>
+            <select id="recursoId" required></select>
+          </div>
+          <div class="field">
+            <label>Solicitante</label>
+            <select id="usuarioId" required></select>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Fecha y hora inicial</label>
+              <input type="datetime-local" id="fechaHoraInicio" required>
+            </div>
+            <div class="field">
+              <label>Fecha y hora final</label>
+              <input type="datetime-local" id="fechaHoraFin" required>
+            </div>
+          </div>
+          <div class="form-actions">
+            <a class="btn" href="/reservas">Cancelar</a>
+            <button type="submit" class="btn primary">Confirmar reserva</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  async function init() {
+    const [recursos, usuarios] = await Promise.all([api.get('/recursos'), api.get('/usuarios')]);
+    fillSelect(document.getElementById('recursoId'), recursos, 'id', r => r.nombre, 'Seleccionar recurso');
+    fillSelect(document.getElementById('usuarioId'), usuarios, 'id', u => u.nombre + ' ' + u.apellido, 'Seleccionar solicitante');
+  }
+
+  document.getElementById('form-reserva').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      recursoId: Number(document.getElementById('recursoId').value),
+      usuarioId: Number(document.getElementById('usuarioId').value),
+      fechaHoraInicio: fromDatetimeLocalValue(document.getElementById('fechaHoraInicio').value),
+      fechaHoraFin: fromDatetimeLocalValue(document.getElementById('fechaHoraFin').value),
+      estadoReserva: 'CONFIRMADA',
+    };
+    try {
+      await api.post('/reservas', payload);
+      location.href = '/reservas';
+    } catch (err) {
+      showAlert(document.getElementById('alert'), 'Recurso no disponible: ' + err.message, 'error');
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>

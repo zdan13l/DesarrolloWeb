@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Recurso · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='recursos')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Recursos / Catálogo / <strong id=&quot;crumb-titulo&quot;>Nuevo recurso</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1 id="titulo">Nuevo recurso</h1>
+          <p>Registra un espacio físico o equipo del campus.</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 640px;">
+        <div id="alert" class="alert error"></div>
+        <form id="form-recurso">
+          <div class="field">
+            <label>Nombre del recurso</label>
+            <input type="text" id="nombre" placeholder="Ej. Sala Ingeniería 4, MacBook #15..." required>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Tipo de recurso</label>
+              <select id="tipoRecurso" required>
+                <option value="ESPACIO">Espacio</option>
+                <option value="EQUIPO">Equipo</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Categoría</label>
+              <select id="categoriaId" required></select>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Ubicación</label>
+              <select id="ubicacionId" required></select>
+            </div>
+            <div class="field">
+              <label>Modalidad</label>
+              <select id="modalidadRecurso" required>
+                <option value="RESERVABLE">Reservable</option>
+                <option value="PRESTABLE">Prestable</option>
+                <option value="AMBAS">Ambas</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Estado inicial</label>
+            <select id="estadoOperativo" required>
+              <option value="DISPONIBLE">Disponible</option>
+              <option value="PRESTADO">Prestado</option>
+              <option value="BLOQUEADO">Bloqueado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Descripción</label>
+            <textarea id="descripcion" placeholder="Describe el recurso..." required></textarea>
+          </div>
+          <div class="field">
+            <label>Características principales</label>
+            <input type="text" id="caracteristicas" placeholder="Ej. Capacidad para 6 personas, Conexión HDMI..." required>
+          </div>
+          <div class="form-actions">
+            <a class="btn" href="/recursos">Cancelar</a>
+            <button type="submit" class="btn primary">Guardar recurso</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  const partes = location.pathname.split('/').filter(Boolean);
+  const recursoId = partes.length === 3 && partes[0] === 'recursos' ? partes[1] : null;
+  const alertEl = document.getElementById('alert');
+
+  async function cargarSelects() {
+    const [categorias, ubicaciones] = await Promise.all([api.get('/categorias'), api.get('/ubicaciones')]);
+    fillSelect(document.getElementById('categoriaId'), categorias, 'id', c => c.nombre, 'Seleccionar categoría');
+    fillSelect(document.getElementById('ubicacionId'), ubicaciones, 'id', u => u.nombre + ' (' + u.edificio + ')', 'Seleccionar ubicación');
+  }
+
+  async function cargarRecurso() {
+    if (!recursoId) return;
+    document.getElementById('titulo').textContent = 'Editar recurso';
+    document.getElementById('crumb-titulo').textContent = 'Editar recurso';
+    const r = await api.get('/recursos/' + recursoId);
+    document.getElementById('nombre').value = r.nombre;
+    document.getElementById('tipoRecurso').value = r.tipoRecurso;
+    document.getElementById('categoriaId').value = r.categoriaId;
+    document.getElementById('ubicacionId').value = r.ubicacionId;
+    document.getElementById('modalidadRecurso').value = r.modalidadRecurso;
+    document.getElementById('estadoOperativo').value = r.estadoOperativo;
+    document.getElementById('descripcion').value = r.descripcion;
+    document.getElementById('caracteristicas').value = r.caracteristicas;
+  }
+
+  document.getElementById('form-recurso').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      nombre: document.getElementById('nombre').value,
+      tipoRecurso: document.getElementById('tipoRecurso').value,
+      categoriaId: Number(document.getElementById('categoriaId').value),
+      ubicacionId: Number(document.getElementById('ubicacionId').value),
+      modalidadRecurso: document.getElementById('modalidadRecurso').value,
+      estadoOperativo: document.getElementById('estadoOperativo').value,
+      descripcion: document.getElementById('descripcion').value,
+      caracteristicas: document.getElementById('caracteristicas').value,
+    };
+    try {
+      if (recursoId) {
+        await api.put('/recursos/' + recursoId, payload);
+      } else {
+        await api.post('/recursos', payload);
+      }
+      location.href = '/recursos';
+    } catch (err) {
+      showAlert(alertEl, err.message, 'error');
+    }
+  });
+
+  (async () => {
+    await cargarSelects();
+    await cargarRecurso();
+  })();
+</script>
+</body>
+</html>

@@ -86,14 +86,15 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     private UsuarioResponseDTO toResponse(Usuario usuario) {
+        Rol rol = usuario.getRol();
         return new UsuarioResponseDTO(
                 usuario.getId(),
                 usuario.getNombre(),
                 usuario.getApellido(),
                 usuario.getCorreo(),
                 usuario.isActivo(),
-                usuario.getRol().getId(),
-                usuario.getRol().getNombre()
+                rol != null ? rol.getId() : null,
+                rol != null ? rol.getNombre() : null
         );
     }
 }

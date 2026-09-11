@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Categorías · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='categorias')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Recursos / <strong>Categorías</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Categorías</h1>
+          <p>Clasificación de espacios y equipos del campus.</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <table>
+            <thead><tr><th>Nombre</th><th>Descripción</th><th>Acciones</th></tr></thead>
+            <tbody id="tbl-categorias"><tr><td colspan="3" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3 id="titulo-form" style="margin-top:0;">Nueva categoría</h3>
+          <div id="alert" class="alert error"></div>
+          <form id="form-categoria">
+            <input type="hidden" id="categoriaId">
+            <div class="field">
+              <label>Nombre</label>
+              <input type="text" id="nombre" required>
+            </div>
+            <div class="field">
+              <label>Descripción</label>
+              <textarea id="descripcion"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn" id="btn-cancelar" style="display:none;" onclick="resetForm()">Cancelar</button>
+              <button type="submit" class="btn primary">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  async function cargar() {
+    const categorias = await api.get('/categorias');
+    document.getElementById('tbl-categorias').innerHTML = categorias.length
+      ? categorias.map(c => `
+        <tr>
+          <td><strong>${c.nombre}</strong></td>
+          <td>${c.descripcion || '—'}</td>
+          <td class="actions-cell">
+            <a class="text-link" href="#" onclick="editar(${c.id}); return false;">Editar</a>
+            <button class="text-link" style="background:none;border:none;color:var(--red-text);cursor:pointer;padding:0;" onclick="eliminar(${c.id})">Eliminar</button>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="3" class="empty-state">No hay categorías registradas.</td></tr>';
+  }
+
+  async function editar(id) {
+    const c = await api.get('/categorias/' + id);
+    document.getElementById('categoriaId').value = c.id;
+    document.getElementById('nombre').value = c.nombre;
+    document.getElementById('descripcion').value = c.descripcion || '';
+    document.getElementById('titulo-form').textContent = 'Editar categoría';
+    document.getElementById('btn-cancelar').style.display = 'inline-flex';
+  }
+
+  function resetForm() {
+    document.getElementById('form-categoria').reset();
+    document.getElementById('categoriaId').value = '';
+    document.getElementById('titulo-form').textContent = 'Nueva categoría';
+    document.getElementById('btn-cancelar').style.display = 'none';
+  }
+
+  async function eliminar(id) {
+    if (!confirm('¿Eliminar esta categoría?')) return;
+    try {
+      await api.del('/categorias/' + id);
+      cargar();
+    } catch (e) {
+      alert('No se pudo eliminar: ' + e.message);
+    }
+  }
+
+  document.getElementById('form-categoria').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('categoriaId').value;
+    const payload = {
+      nombre: document.getElementById('nombre').value,
+      descripcion: document.getElementById('descripcion').value,
+    };
+    try {
+      if (id) {
+        await api.put('/categorias/' + id, payload);
+      } else {
+        await api.post('/categorias', payload);
+      }
+      resetForm();
+      cargar();
+    } catch (err) {
+      showAlert(document.getElementById('alert'), err.message, 'error');
+    }
+  });
+
+  cargar();
+</script>
+</body>
+</html>

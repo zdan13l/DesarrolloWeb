@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Ubicaciones · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='ubicaciones')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Recursos / <strong>Ubicaciones</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Ubicaciones</h1>
+          <p>Edificios, pisos y espacios físicos del campus.</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <table>
+            <thead><tr><th>Nombre</th><th>Edificio</th><th>Piso</th><th>Acciones</th></tr></thead>
+            <tbody id="tbl-ubicaciones"><tr><td colspan="4" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3 id="titulo-form" style="margin-top:0;">Nueva ubicación</h3>
+          <div id="alert" class="alert error"></div>
+          <form id="form-ubicacion">
+            <input type="hidden" id="ubicacionId">
+            <div class="field">
+              <label>Nombre</label>
+              <input type="text" id="nombre" required>
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Edificio</label>
+                <input type="text" id="edificio" required>
+              </div>
+              <div class="field">
+                <label>Piso</label>
+                <input type="number" id="piso" min="0" required>
+              </div>
+            </div>
+            <div class="field">
+              <label>Detalle</label>
+              <textarea id="detalle"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn" id="btn-cancelar" style="display:none;" onclick="resetForm()">Cancelar</button>
+              <button type="submit" class="btn primary">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  async function cargar() {
+    const ubicaciones = await api.get('/ubicaciones');
+    document.getElementById('tbl-ubicaciones').innerHTML = ubicaciones.length
+      ? ubicaciones.map(u => `
+        <tr>
+          <td><strong>${u.nombre}</strong></td>
+          <td>${u.edificio}</td>
+          <td>${u.piso}</td>
+          <td class="actions-cell">
+            <a class="text-link" href="#" onclick="editar(${u.id}); return false;">Editar</a>
+            <button class="text-link" style="background:none;border:none;color:var(--red-text);cursor:pointer;padding:0;" onclick="eliminar(${u.id})">Eliminar</button>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" class="empty-state">No hay ubicaciones registradas.</td></tr>';
+  }
+
+  async function editar(id) {
+    const u = await api.get('/ubicaciones/' + id);
+    document.getElementById('ubicacionId').value = u.id;
+    document.getElementById('nombre').value = u.nombre;
+    document.getElementById('edificio').value = u.edificio;
+    document.getElementById('piso').value = u.piso;
+    document.getElementById('detalle').value = u.detalle || '';
+    document.getElementById('titulo-form').textContent = 'Editar ubicación';
+    document.getElementById('btn-cancelar').style.display = 'inline-flex';
+  }
+
+  function resetForm() {
+    document.getElementById('form-ubicacion').reset();
+    document.getElementById('ubicacionId').value = '';
+    document.getElementById('titulo-form').textContent = 'Nueva ubicación';
+    document.getElementById('btn-cancelar').style.display = 'none';
+  }
+
+  async function eliminar(id) {
+    if (!confirm('¿Eliminar esta ubicación?')) return;
+    try {
+      await api.del('/ubicaciones/' + id);
+      cargar();
+    } catch (e) {
+      alert('No se pudo eliminar: ' + e.message);
+    }
+  }
+
+  document.getElementById('form-ubicacion').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('ubicacionId').value;
+    const payload = {
+      nombre: document.getElementById('nombre').value,
+      edificio: document.getElementById('edificio').value,
+      piso: Number(document.getElementById('piso').value),
+      detalle: document.getElementById('detalle').value,
+    };
+    try {
+      if (id) {
+        await api.put('/ubicaciones/' + id, payload);
+      } else {
+        await api.post('/ubicaciones', payload);
+      }
+      resetForm();
+      cargar();
+    } catch (err) {
+      showAlert(document.getElementById('alert'), err.message, 'error');
+    }
+  });
+
+  cargar();
+</script>
+</body>
+</html>

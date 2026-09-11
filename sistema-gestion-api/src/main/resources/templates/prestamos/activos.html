@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Préstamos activos · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='prestamos-activos')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Préstamos / <strong>Activos</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Control de préstamos</h1>
+          <p>Visualiza las entregas y retornos de recursos del campus.</p>
+        </div>
+        <a class="btn primary" href="/prestamos/entrega">+ Registrar entrega</a>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead><tr><th>Recurso</th><th>Responsable</th><th>Entrega</th><th>Límite</th><th>Estado</th></tr></thead>
+          <tbody id="tbl-prestamos"><tr><td colspan="5" class="empty-state">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  async function cargar() {
+    const prestamos = await api.get('/prestamos');
+    const activos = prestamos.filter(p => p.estadoPrestamo === 'ACTIVO');
+    const body = document.getElementById('tbl-prestamos');
+    if (!activos.length) {
+      body.innerHTML = '<tr><td colspan="5" class="empty-state">No hay préstamos activos.</td></tr>';
+      return;
+    }
+    const ahora = new Date();
+    body.innerHTML = activos.map(p => {
+      const tardio = new Date(p.fechaHoraLimite) < ahora;
+      return `
+      <tr>
+        <td><strong>${p.recursoNombre}</strong></td>
+        <td>${p.usuarioNombre}</td>
+        <td>${formatDateTime(p.fechaHoraEntrega)}</td>
+        <td>${formatDateTime(p.fechaHoraLimite)}</td>
+        <td>${tardio ? badge('Tardío', 'red') : badge('Activo', 'blue')}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  cargar();
+</script>
+</body>
+</html>

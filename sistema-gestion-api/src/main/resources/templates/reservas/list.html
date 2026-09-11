@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Reservas · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='reservas')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Reservas / <strong>Listado</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Reservas</h1>
+          <p>Consulta, modifica el estado o cancela reservas existentes.</p>
+        </div>
+        <a class="btn primary" href="/reservas/nueva">+ Nueva reserva</a>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead><tr><th>Recurso</th><th>Solicitante</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbl-reservas"><tr><td colspan="6" class="empty-state">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  async function cargar() {
+    const reservas = await api.get('/reservas');
+    const body = document.getElementById('tbl-reservas');
+    if (!reservas.length) {
+      body.innerHTML = '<tr><td colspan="6" class="empty-state">No hay reservas registradas.</td></tr>';
+      return;
+    }
+    body.innerHTML = reservas.map(r => `
+      <tr>
+        <td><strong>${r.recursoNombre}</strong></td>
+        <td>${r.usuarioNombre}</td>
+        <td>${formatDateTime(r.fechaHoraInicio)}</td>
+        <td>${formatDateTime(r.fechaHoraFin)}</td>
+        <td>${badge(r.estadoReserva, ESTADO_RESERVA_BADGE[r.estadoReserva] || 'gray')}</td>
+        <td class="actions-cell">
+          ${r.estadoReserva === 'CONFIRMADA' ? `<button class="text-link" style="background:none;border:none;color:var(--red-text);cursor:pointer;padding:0;" onclick="cancelar(${r.id})">Cancelar</button>` : ''}
+        </td>
+      </tr>`).join('');
+  }
+
+  async function cancelar(id) {
+    if (!confirm('¿Cancelar esta reserva?')) return;
+    try {
+      const r = await api.get('/reservas/' + id);
+      await api.put('/reservas/' + id, {
+        recursoId: r.recursoId, usuarioId: r.usuarioId,
+        fechaHoraInicio: r.fechaHoraInicio, fechaHoraFin: r.fechaHoraFin,
+        estadoReserva: 'CANCELADA',
+      });
+      cargar();
+    } catch (e) {
+      alert('No se pudo cancelar: ' + e.message);
+    }
+  }
+
+  cargar();
+</script>
+</body>
+</html>

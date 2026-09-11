@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar entrega · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='prestamos-entrega')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Préstamos / <strong>Registrar entrega</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Registrar entrega</h1>
+          <p>Formulario para realizar la entrega de un equipo o espacio reservado.</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 640px;">
+        <div id="alert" class="alert error"></div>
+        <form id="form-entrega">
+          <div class="field">
+            <label>Reserva asociada</label>
+            <select id="reservaId" required></select>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Fecha y hora de entrega</label>
+              <input type="datetime-local" id="fechaHoraEntrega" required>
+            </div>
+            <div class="field">
+              <label>Fecha límite de devolución</label>
+              <input type="datetime-local" id="fechaHoraLimite" required>
+            </div>
+          </div>
+          <div class="field">
+            <label>Estado inicial del recurso</label>
+            <select id="estadoInicial" required>
+              <option value="BUENO">Bueno</option>
+              <option value="REGULAR">Regular</option>
+              <option value="DANADO">Dañado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Accesorios entregados</label>
+            <input type="text" id="accesorios" placeholder="Ej. Cargador original" required>
+          </div>
+          <div class="field">
+            <label>Observaciones</label>
+            <textarea id="observaciones" placeholder="Detalles de la entrega..." required></textarea>
+          </div>
+          <div class="form-actions">
+            <a class="btn" href="/prestamos/activos">Cancelar</a>
+            <button type="submit" class="btn primary">Registrar entrega</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  let reservas = [];
+
+  async function init() {
+    reservas = (await api.get('/reservas')).filter(r => r.estadoReserva === 'CONFIRMADA');
+    fillSelect(document.getElementById('reservaId'), reservas, 'id',
+      r => r.recursoNombre + ' — ' + r.usuarioNombre + ' (' + formatDateTime(r.fechaHoraInicio) + ')',
+      'Seleccionar reserva');
+  }
+
+  document.getElementById('form-entrega').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const reserva = reservas.find(r => r.id === Number(document.getElementById('reservaId').value));
+    if (!reserva) {
+      showAlert(document.getElementById('alert'), 'Selecciona una reserva válida.', 'error');
+      return;
+    }
+    const estadoInicial = document.getElementById('estadoInicial').value;
+    const payload = {
+      recursoId: reserva.recursoId,
+      usuarioId: reserva.usuarioId,
+      reservaId: reserva.id,
+      fechaHoraEntrega: fromDatetimeLocalValue(document.getElementById('fechaHoraEntrega').value),
+      fechaHoraLimite: fromDatetimeLocalValue(document.getElementById('fechaHoraLimite').value),
+      fechaHoraDevolucion: null,
+      estadoInicial: estadoInicial,
+      estadoFinal: estadoInicial,
+      estadoPrestamo: 'ACTIVO',
+      accesorios: document.getElementById('accesorios').value,
+      observaciones: document.getElementById('observaciones').value,
+    };
+    try {
+      await api.post('/prestamos', payload);
+      location.href = '/prestamos/activos';
+    } catch (err) {
+      showAlert(document.getElementById('alert'), err.message, 'error');
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>

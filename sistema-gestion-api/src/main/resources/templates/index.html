@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Inicio · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='inicio')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Inicio / <strong>Dashboard</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Resumen del campus</h1>
+          <p>Monitoreo básico de recursos y operaciones del campus universitario.</p>
+        </div>
+        <a class="btn primary" href="/reservas/nueva">+ Nueva reserva</a>
+      </div>
+
+      <div class="form-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+        <div class="card" style="margin-bottom:0;">
+          <div style="color:var(--text-muted); font-size:13px;">Disponibles</div>
+          <div id="count-disponibles" style="font-size:28px; font-weight:700;">—</div>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <div style="color:var(--text-muted); font-size:13px;">Reservados</div>
+          <div id="count-reservados" style="font-size:28px; font-weight:700;">—</div>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <div style="color:var(--text-muted); font-size:13px;">Prestados</div>
+          <div id="count-prestados" style="font-size:28px; font-weight:700;">—</div>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <div style="color:var(--text-muted); font-size:13px;">Bloqueados</div>
+          <div id="count-bloqueados" style="font-size:28px; font-weight:700;">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Reservas por recurso</h3>
+        <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">Cantidad de reservas registradas por recurso.</p>
+        <table>
+          <thead><tr><th>Recurso</th><th>Reservas</th></tr></thead>
+          <tbody id="tbl-reservas-por-recurso"><tr><td colspan="2" class="empty-state">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Estado actual de recursos</h3>
+        <table>
+          <thead><tr><th>Recurso</th><th>Tipo</th><th>Categoría</th><th>Ubicación</th><th>Estado</th></tr></thead>
+          <tbody id="tbl-recursos"><tr><td colspan="5" class="empty-state">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  (async function () {
+    try {
+      const [recursos, reservas] = await Promise.all([api.get('/recursos'), api.get('/reservas')]);
+
+      document.getElementById('count-disponibles').textContent = recursos.filter(r => r.estadoOperativo === 'DISPONIBLE').length;
+      document.getElementById('count-prestados').textContent = recursos.filter(r => r.estadoOperativo === 'PRESTADO').length;
+      document.getElementById('count-bloqueados').textContent = recursos.filter(r => r.estadoOperativo === 'BLOQUEADO').length;
+      document.getElementById('count-reservados').textContent = reservas.filter(r => r.estadoReserva === 'CONFIRMADA').length;
+
+      const porRecurso = {};
+      reservas.forEach(r => { porRecurso[r.recursoNombre] = (porRecurso[r.recursoNombre] || 0) + 1; });
+      const filas = Object.entries(porRecurso);
+      document.getElementById('tbl-reservas-por-recurso').innerHTML = filas.length
+        ? filas.map(([nombre, cant]) => `<tr><td>${nombre}</td><td>${cant}</td></tr>`).join('')
+        : '<tr><td colspan="2" class="empty-state">Aún no hay reservas registradas.</td></tr>';
+
+      document.getElementById('tbl-recursos').innerHTML = recursos.slice(0, 8).map(r => `
+        <tr>
+          <td><strong>${r.nombre}</strong></td>
+          <td>${r.tipoRecurso}</td>
+          <td>${r.categoriaNombre}</td>
+          <td>${r.ubicacionNombre}</td>
+          <td>${badge(r.estadoOperativo, ESTADO_RECURSO_BADGE[r.estadoOperativo] || 'gray')}</td>
+        </tr>`).join('') || '<tr><td colspan="5" class="empty-state">No hay recursos registrados.</td></tr>';
+    } catch (e) {
+      console.error(e);
+    }
+  })();
+</script>
+</body>
+</html>

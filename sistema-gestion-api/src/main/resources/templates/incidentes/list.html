@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Incidentes · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='incidentes')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Incidentes / <strong>Listado</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Gestión de incidentes</h1>
+          <p>Supervisa los reportes y novedades de recursos del campus.</p>
+        </div>
+        <a class="btn primary" href="/incidentes/reportar">+ Reportar</a>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead><tr><th>Recurso</th><th>Tipo</th><th>Severidad</th><th>Fecha</th><th>Descripción</th></tr></thead>
+          <tbody id="tbl-incidentes"><tr><td colspan="5" class="empty-state">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  async function cargar() {
+    const incidentes = await api.get('/incidentes');
+    const body = document.getElementById('tbl-incidentes');
+    if (!incidentes.length) {
+      body.innerHTML = '<tr><td colspan="5" class="empty-state">No hay incidentes registrados.</td></tr>';
+      return;
+    }
+    body.innerHTML = incidentes.map(i => `
+      <tr>
+        <td><strong>${i.recursoNombre}</strong></td>
+        <td>${i.tipoIncidente}</td>
+        <td>${badge(i.severidadIncidente, SEVERIDAD_BADGE[i.severidadIncidente] || 'gray')}</td>
+        <td>${formatDateTime(i.fecha)}</td>
+        <td>${i.descripcion}</td>
+      </tr>`).join('');
+  }
+
+  cargar();
+</script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Reportar incidente · PontiReservas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <div th:replace="~{fragments/layout :: sidebar(active='incidentes-reportar')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(crumbs='Incidentes / <strong>Reportar</strong>')}"></div>
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Reportar incidente o novedad</h1>
+          <p>Informa anomalías detectadas en los dispositivos o espacios del campus.</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 640px;">
+        <div id="alert" class="alert error"></div>
+        <form id="form-incidente">
+          <div class="field">
+            <label>Recurso</label>
+            <select id="recursoId" required></select>
+          </div>
+          <div class="field">
+            <label>Reportado por</label>
+            <select id="usuarioId" required></select>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Tipo de novedad</label>
+              <select id="tipoIncidente" required>
+                <option value="DANO_FISICO">Daño físico</option>
+                <option value="FALLA_FUNCIONAMIENTO">Falla de funcionamiento</option>
+                <option value="ACCESORIO_FALTANTE">Accesorio faltante</option>
+                <option value="CONDICION_INADECUADA">Condición inadecuada</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Severidad</label>
+              <select id="severidadIncidente" required>
+                <option value="LEVE">Leve</option>
+                <option value="MEDIA">Media</option>
+                <option value="CRITICA">Crítica</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Fecha y hora de detección</label>
+            <input type="datetime-local" id="fecha" required>
+          </div>
+          <div class="field">
+            <label>Descripción detallada</label>
+            <textarea id="descripcion" placeholder="Describe claramente el fallo o daño observado..." required></textarea>
+          </div>
+          <div id="alerta-critica" class="alert" style="display:none; background: var(--yellow-bg); color: var(--yellow-text);">
+            Nota: al registrar una novedad de severidad Crítica, recuerda bloquear manualmente el recurso desde el catálogo.
+          </div>
+          <div class="form-actions">
+            <a class="btn" href="/incidentes">Cancelar</a>
+            <button type="submit" class="btn primary">Registrar incidente</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+  async function init() {
+    const [recursos, usuarios] = await Promise.all([api.get('/recursos'), api.get('/usuarios')]);
+    fillSelect(document.getElementById('recursoId'), recursos, 'id', r => r.nombre, 'Seleccionar recurso');
+    fillSelect(document.getElementById('usuarioId'), usuarios, 'id', u => u.nombre + ' ' + u.apellido, 'Seleccionar usuario');
+  }
+
+  document.getElementById('severidadIncidente').addEventListener('change', (e) => {
+    document.getElementById('alerta-critica').style.display = e.target.value === 'CRITICA' ? 'block' : 'none';
+  });
+
+  document.getElementById('form-incidente').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      recursoId: Number(document.getElementById('recursoId').value),
+      usuarioId: Number(document.getElementById('usuarioId').value),
+      tipoIncidente: document.getElementById('tipoIncidente').value,
+      severidadIncidente: document.getElementById('severidadIncidente').value,
+      fecha: fromDatetimeLocalValue(document.getElementById('fecha').value),
+      descripcion: document.getElementById('descripcion').value,
+    };
+    try {
+      await api.post('/incidentes', payload);
+      location.href = '/incidentes';
+    } catch (err) {
+      showAlert(document.getElementById('alert'), err.message, 'error');
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>
