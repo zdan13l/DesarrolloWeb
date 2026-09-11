@@ -50,3 +50,21 @@ La API quedará disponible en `http://localhost:8080`.
 cd sistema-gestion-api
 ./mvnw test
 ```
+
+## Aplicación multipágina (MPA)
+
+Además de la API REST, el proyecto ahora incluye una aplicación multipágina (Thymeleaf) que consume esos mismos endpoints: sidebar de navegación por módulo (Recursos, Categorías, Ubicaciones, Reservas, Préstamos, Incidentes) y formularios básicos de CRUD para cada entidad del alcance de esta entrega. Se sirve desde la misma app en `http://localhost:8080/`.
+
+## Diagrama de navegación
+
+En el archivo [`DiagramadeNavegacion.pdf`](./DiagramadeNavegacion.pdf) está el diagrama de navegación completo de la aplicación, por si lo quieren revisar antes de entrar a probarla.
+
+## Mockups
+
+Los mockups de las pantallas están hechos en Figma: https://www.figma.com/proto/CAwhnKbtCnrAH8Xunz1QoZ/PontiReservas?node-id=0-1&t=71j6AcbdDmoBbRE0-1
+
+Si no lo pueden visualizar, también está el respaldo en PDF: [`MockupsPontiReservas.pdf`](./MockupsPontiReservas.pdf)
+
+## Video de sustentación
+
+https://youtu.be/E-NTiO7pRbI
