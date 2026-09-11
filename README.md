@@ -65,6 +65,13 @@ Los mockups de las pantallas están hechos en Figma: https://www.figma.com/proto
 
 Si no lo pueden visualizar, también está el respaldo en PDF: [`MockupsPontiReservas.pdf`](./MockupsPontiReservas.pdf)
 
+## Casos de uso 
+
+Descripción detallada de los casos de uso para la aplicación [`CUs Proyecto Web`](<CUs Proyecto Web.xlsx>)
+
+## Diagrama Entidad-Relación
+Diagrama ER con las entidades a persistir en la página web, contando además con los enums utilizados para el desarrollo [`Diagrama ER`](DiagramaER.pdf)
+
 ## Video de sustentación
 
 https://youtu.be/E-NTiO7pRbI
