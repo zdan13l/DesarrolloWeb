@@ -51,6 +51,16 @@ public class ReservaController {
         return reservaService.actualizar(id, dto);
     }
 
+
+
+    @PatchMapping("/{id}/cancelar")
+    @ResponseStatus(HttpStatus.OK)
+    public ReservaResponseDTO cancelar(@PathVariable Long id) {
+        return reservaService.cancelar(id);
+    }
+
+
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

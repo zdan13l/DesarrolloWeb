@@ -31,5 +31,29 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
             @Param("finDia") Instant finDia
     );
 
+
+
+    @Query("SELECT r FROM Reserva r WHERE r.recurso.id = :recursoId " +
+            "AND r.estadoReserva = 'CONFIRMADA' " +
+            "AND r.fechaHoraInicio < :fechaFin AND r.fechaHoraFin > :fechaInicio")
+    List<Reserva> findSolapamientos(
+            @Param("recursoId") Long recursoId,
+            @Param("fechaInicio") Instant fechaInicio,
+            @Param("fechaFin") Instant fechaFin
+    );
+
+
+
+    @Query("SELECT r FROM Reserva r WHERE r.recurso.id = :recursoId " +
+            "AND r.estadoReserva = 'CONFIRMADA' " +
+            "AND r.id <> :reservaId " +
+            "AND r.fechaHoraInicio < :fechaFin AND r.fechaHoraFin > :fechaInicio")
+    List<Reserva> findSolapamientosExcluyendo(
+            @Param("recursoId") Long recursoId,
+            @Param("fechaInicio") Instant fechaInicio,
+            @Param("fechaFin") Instant fechaFin,
+            @Param("reservaId") Long reservaId
+    );
+
     boolean existsByRecursoId(Long recursoId);
 }

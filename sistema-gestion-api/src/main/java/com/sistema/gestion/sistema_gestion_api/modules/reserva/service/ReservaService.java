@@ -19,5 +19,7 @@ public interface ReservaService {
 
     ReservaResponseDTO actualizar(Long id, ReservaRequestDTO dto);
 
+    ReservaResponseDTO cancelar(Long id);
+
     void eliminar(Long id);
 }
