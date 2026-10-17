@@ -20,4 +20,17 @@ public interface PrestamoRepository extends JpaRepository<Prestamo, Long> {
     @Query("SELECT p FROM Prestamo p WHERE p.estadoPrestamo = com.sistema.gestion.sistema_gestion_api.modules.prestamo.model.EstadoPrestamo.ACTIVO " +
             "AND p.fechaHoraLimite < :ahora")
     List<Prestamo> buscarVencidos(@Param("ahora") Instant ahora);
+
+
+
+    @Query("SELECT p FROM Prestamo p WHERE p.recurso.id = :recursoId " +
+            "AND p.estadoPrestamo = 'ACTIVO' " +
+            "AND p.fechaHoraEntrega < :finDia AND p.fechaHoraLimite > :inicioDia")
+    List<Prestamo> findPrestamosActivosPorDia(
+            @Param("recursoId") Long recursoId,
+            @Param("inicioDia") Instant inicioDia,
+            @Param("finDia") Instant finDia
+    );
+
+    boolean existsByRecursoId(Long recursoId);
 }

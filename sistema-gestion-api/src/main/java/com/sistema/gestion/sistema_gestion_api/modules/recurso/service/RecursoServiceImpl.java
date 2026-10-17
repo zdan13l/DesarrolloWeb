@@ -2,18 +2,24 @@ package com.sistema.gestion.sistema_gestion_api.modules.recurso.service;
 
 import com.sistema.gestion.sistema_gestion_api.modules.categoria.model.Categoria;
 import com.sistema.gestion.sistema_gestion_api.modules.categoria.repository.CategoriaRepository;
+import com.sistema.gestion.sistema_gestion_api.modules.prestamo.repository.PrestamoRepository;
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.dto.FranjaOcupadaResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.dto.RecursoRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.dto.RecursoResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.EstadoOperativo;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.Recurso;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.TipoRecurso;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.repository.RecursoRepository;
+import com.sistema.gestion.sistema_gestion_api.modules.reserva.repository.ReservaRepository;
 import com.sistema.gestion.sistema_gestion_api.modules.ubicacion.model.Ubicacion;
 import com.sistema.gestion.sistema_gestion_api.modules.ubicacion.repository.UbicacionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,13 +28,17 @@ public class RecursoServiceImpl implements RecursoService {
     private final RecursoRepository recursoRepository;
     private final CategoriaRepository categoriaRepository;
     private final UbicacionRepository ubicacionRepository;
+    private final ReservaRepository reservaRepository;
+    private final PrestamoRepository prestamoRepository;
 
     public RecursoServiceImpl(RecursoRepository recursoRepository,
-                               CategoriaRepository categoriaRepository,
-                               UbicacionRepository ubicacionRepository) {
+                              CategoriaRepository categoriaRepository,
+                              UbicacionRepository ubicacionRepository, ReservaRepository reservaRepository, PrestamoRepository prestamoRepository) {
         this.recursoRepository = recursoRepository;
         this.categoriaRepository = categoriaRepository;
         this.ubicacionRepository = ubicacionRepository;
+        this.reservaRepository = reservaRepository;
+        this.prestamoRepository = prestamoRepository;
     }
 
     @Override
@@ -69,8 +79,58 @@ public class RecursoServiceImpl implements RecursoService {
         if (!recursoRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recurso no encontrado: " + id);
         }
+
+        boolean tieneReservas = reservaRepository.existsByRecursoId(id);
+        boolean tienePrestamos = prestamoRepository.existsByRecursoId(id);
+
+        if (tieneReservas || tienePrestamos) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "No se puede eliminar el recurso porque tiene reservas o préstamos asociados.");
+        }
+
         recursoRepository.deleteById(id);
     }
+
+
+
+    @Override
+    public List<FranjaOcupadaResponseDTO> obtenerDisponibilidad(Long id, LocalDate fecha) {
+        buscarEntidad(id);
+
+        Instant inicioDia = fecha.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant finDia = fecha.atTime(LocalTime.MAX).atZone(ZoneId.of("UTC")).toInstant();
+
+        List<FranjaOcupadaResponseDTO> franjas = new ArrayList<>();
+
+        reservaRepository.findReservasConfirmadasPorDia(id, inicioDia, finDia).forEach(reserva ->
+                franjas.add(new FranjaOcupadaResponseDTO(reserva.getFechaHoraInicio(), reserva.getFechaHoraFin(), "RESERVA"))
+        );
+
+        prestamoRepository.findPrestamosActivosPorDia(id, inicioDia, finDia).forEach(prestamo ->
+                franjas.add(new FranjaOcupadaResponseDTO(prestamo.getFechaHoraEntrega(), prestamo.getFechaHoraLimite(), "PRESTAMO"))
+        );
+
+        return franjas;
+    }
+
+
+
+    @Override
+    @Transactional
+    public RecursoResponseDTO habilitarRecurso(Long id) {
+        Recurso recurso = buscarEntidad(id);
+
+        if (recurso.getEstadoOperativo() != EstadoOperativo.BLOQUEADO) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El recurso no está BLOQUEADO. Estado actual: " + recurso.getEstadoOperativo());
+        }
+
+        recurso.setEstadoOperativo(EstadoOperativo.DISPONIBLE);
+        return toResponse(recursoRepository.save(recurso));
+    }
+
+
+
 
     private void aplicarDatos(Recurso recurso, RecursoRequestDTO dto) {
         recurso.setNombre(dto.nombre());
@@ -113,4 +173,7 @@ public class RecursoServiceImpl implements RecursoService {
                 recurso.getUbicacion().getNombre()
         );
     }
+
+
+
 }

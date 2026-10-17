@@ -1,10 +1,12 @@
 package com.sistema.gestion.sistema_gestion_api.modules.recurso.service;
 
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.dto.FranjaOcupadaResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.dto.RecursoRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.dto.RecursoResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.EstadoOperativo;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.TipoRecurso;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface RecursoService {
@@ -20,4 +22,7 @@ public interface RecursoService {
     RecursoResponseDTO actualizar(Long id, RecursoRequestDTO dto);
 
     void eliminar(Long id);
+
+    List<FranjaOcupadaResponseDTO> obtenerDisponibilidad(Long id, LocalDate fecha);
+    RecursoResponseDTO habilitarRecurso(Long id);
 }

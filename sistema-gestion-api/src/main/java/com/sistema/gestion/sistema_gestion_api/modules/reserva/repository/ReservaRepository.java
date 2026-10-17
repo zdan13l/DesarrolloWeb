@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
@@ -18,4 +19,17 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     @Query("SELECT COUNT(r) FROM Reserva r WHERE r.recurso.id = :recursoId")
     long contarPorRecurso(@Param("recursoId") Long recursoId);
+
+
+
+    @Query("SELECT r FROM Reserva r WHERE r.recurso.id = :recursoId " +
+            "AND r.estadoReserva = 'CONFIRMADA' " +
+            "AND r.fechaHoraInicio < :finDia AND r.fechaHoraFin > :inicioDia")
+    List<Reserva> findReservasConfirmadasPorDia(
+            @Param("recursoId") Long recursoId,
+            @Param("inicioDia") Instant inicioDia,
+            @Param("finDia") Instant finDia
+    );
+
+    boolean existsByRecursoId(Long recursoId);
 }
