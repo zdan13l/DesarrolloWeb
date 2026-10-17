@@ -3,7 +3,9 @@ package com.sistema.gestion.sistema_gestion_api.modules.incidente.service;
 import com.sistema.gestion.sistema_gestion_api.modules.incidente.dto.IncidenteRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.incidente.dto.IncidenteResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.incidente.model.Incidente;
+import com.sistema.gestion.sistema_gestion_api.modules.incidente.model.SeveridadIncidente;
 import com.sistema.gestion.sistema_gestion_api.modules.incidente.repository.IncidenteRepository;
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.EstadoOperativo;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.Recurso;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.repository.RecursoRepository;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.model.Usuario;
@@ -52,6 +54,17 @@ public class IncidenteServiceImpl implements IncidenteService {
     public IncidenteResponseDTO crear(IncidenteRequestDTO dto) {
         Incidente incidente = new Incidente();
         aplicarDatos(incidente, dto);
+
+        Recurso recurso = incidente.getRecurso();
+        boolean bloqueadoPorCritico = false;
+
+        if (dto.severidadIncidente() == SeveridadIncidente.CRITICA) {
+            recurso.setEstadoOperativo(EstadoOperativo.BLOQUEADO);
+            recursoRepository.save(recurso);
+            bloqueadoPorCritico = true;
+        }
+
+        incidente.setRecursoBloqueado(bloqueadoPorCritico);
         return toResponse(incidenteRepository.save(incidente));
     }
 
@@ -104,7 +117,8 @@ public class IncidenteServiceImpl implements IncidenteService {
                 incidente.getRecurso().getId(),
                 incidente.getRecurso().getNombre(),
                 incidente.getUsuario().getId(),
-                incidente.getUsuario().getNombre()
+                incidente.getUsuario().getNombre(),
+                incidente.getRecursoBloqueado()
         );
     }
 }

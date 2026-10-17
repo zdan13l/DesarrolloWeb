@@ -26,6 +26,9 @@ public class Incidente {
     @Column(nullable = false)
     private Instant fecha; //revisar el tipo de dato
 
+    @Column(name = "recurso_bloqueado")
+    private Boolean recursoBloqueado;
+
     @ManyToOne
     @JoinColumn(name = "recurso_id", nullable = false)
     private Recurso recurso;
@@ -76,6 +79,14 @@ public class Incidente {
 
     public void setFecha(Instant fecha) {
         this.fecha = fecha;
+    }
+
+    public Boolean getRecursoBloqueado() {
+        return recursoBloqueado;
+    }
+
+    public void setRecursoBloqueado(Boolean recursoBloqueado) {
+        this.recursoBloqueado = recursoBloqueado;
     }
 
     public Recurso getRecurso() {

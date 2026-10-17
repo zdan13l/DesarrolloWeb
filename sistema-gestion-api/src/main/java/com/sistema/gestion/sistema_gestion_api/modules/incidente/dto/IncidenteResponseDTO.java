@@ -14,6 +14,7 @@ public record IncidenteResponseDTO(
         Long recursoId,
         String recursoNombre,
         Long usuarioId,
-        String usuarioNombre
+        String usuarioNombre,
+        Boolean recursoBloqueado
 ) {
 }
