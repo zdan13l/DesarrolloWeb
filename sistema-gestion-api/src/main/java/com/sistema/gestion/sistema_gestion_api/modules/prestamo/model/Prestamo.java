@@ -42,6 +42,9 @@ public class Prestamo {
     @Column(name = "estado", nullable = false)
     private EstadoPrestamo estadoPrestamo;
 
+    @Column(name = "devolucion_tardia")
+    private Boolean devolucionTardia;
+
     @ManyToOne
     @JoinColumn(name = "recurso_id", nullable = false)
     private Recurso recurso;
@@ -131,6 +134,10 @@ public class Prestamo {
     public void setEstadoPrestamo(EstadoPrestamo estadoPrestamo) {
         this.estadoPrestamo = estadoPrestamo;
     }
+
+    public Boolean getDevolucionTardia() { return devolucionTardia; }
+
+    public void setDevolucionTardia(Boolean devolucionTardia) { this.devolucionTardia = devolucionTardia; }
 
     public Recurso getRecurso() {
         return recurso;

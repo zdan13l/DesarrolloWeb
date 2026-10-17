@@ -1,5 +1,6 @@
 package com.sistema.gestion.sistema_gestion_api.modules.prestamo.service;
 
+import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.DevolucionRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.PrestamoRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.PrestamoResponseDTO;
 
@@ -18,6 +19,8 @@ public interface PrestamoService {
     List<PrestamoResponseDTO> buscarVencidos();
 
     PrestamoResponseDTO crear(PrestamoRequestDTO dto);
+
+    PrestamoResponseDTO registrarDevolucion(Long id, DevolucionRequestDTO dto);
 
     PrestamoResponseDTO actualizar(Long id, PrestamoRequestDTO dto);
 

@@ -1,5 +1,6 @@
 package com.sistema.gestion.sistema_gestion_api.modules.prestamo.controller;
 
+import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.DevolucionRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.PrestamoRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.PrestamoResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.service.PrestamoService;
@@ -48,6 +49,17 @@ public class PrestamoController {
     public PrestamoResponseDTO crear(@Valid @RequestBody PrestamoRequestDTO dto) {
         return prestamoService.crear(dto);
     }
+
+
+    @PatchMapping("/{id}/devolucion")
+    @ResponseStatus(HttpStatus.OK)
+    public PrestamoResponseDTO registrarDevolucion(
+            @PathVariable Long id,
+            @Valid @RequestBody DevolucionRequestDTO dto) {
+        return prestamoService.registrarDevolucion(id, dto);
+    }
+
+
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)

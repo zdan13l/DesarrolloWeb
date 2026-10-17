@@ -1,9 +1,13 @@
 package com.sistema.gestion.sistema_gestion_api.modules.prestamo.service;
 
+import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.DevolucionRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.PrestamoRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.PrestamoResponseDTO;
+import com.sistema.gestion.sistema_gestion_api.modules.prestamo.model.EstadoPrestamo;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.model.Prestamo;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.repository.PrestamoRepository;
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.EstadoOperativo;
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.ModalidadRecurso;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.Recurso;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.repository.RecursoRepository;
 import com.sistema.gestion.sistema_gestion_api.modules.reserva.model.Reserva;
@@ -12,6 +16,7 @@ import com.sistema.gestion.sistema_gestion_api.modules.usuario.model.Usuario;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -70,10 +75,60 @@ public class PrestamoServiceImpl implements PrestamoService {
 
     @Override
     public PrestamoResponseDTO crear(PrestamoRequestDTO dto) {
+        Recurso recurso = buscarRecurso(dto.recursoId());
+
+        if (recurso.getEstadoOperativo() == EstadoOperativo.BLOQUEADO) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El recurso está BLOQUEADO y no puede ser prestado");
+        }
+
+        if (recurso.getModalidadRecurso() != ModalidadRecurso.PRESTABLE && recurso.getModalidadRecurso() != ModalidadRecurso.AMBAS) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El recurso no permite la modalidad de préstamo");
+        }
+
         Prestamo prestamo = new Prestamo();
         aplicarDatos(prestamo, dto);
+        prestamo.setEstadoPrestamo(EstadoPrestamo.ACTIVO);
+
+        recurso.setEstadoOperativo(EstadoOperativo.PRESTADO);
+        recursoRepository.save(recurso);
+
         return toResponse(prestamoRepository.save(prestamo));
     }
+
+
+
+
+    @Override
+    @Transactional
+    public PrestamoResponseDTO registrarDevolucion(Long id, DevolucionRequestDTO dto) {
+        Prestamo prestamo = buscarEntidad(id);
+
+        if (prestamo.getEstadoPrestamo() != EstadoPrestamo.ACTIVO) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El préstamo ya ha sido devuelto anteriormente");
+        }
+
+        Instant ahora = Instant.now();
+        prestamo.setFechaHoraDevolucion(ahora);
+        prestamo.setEstadoFinal(dto.estadoFinal());
+        if (dto.observaciones() != null && !dto.observaciones().isBlank()) {
+            prestamo.setObservaciones(prestamo.getObservaciones() + " | Devolución: " + dto.observaciones());
+        }
+        prestamo.setEstadoPrestamo(EstadoPrestamo.DEVUELTO);
+
+
+        boolean esTardia = ahora.isAfter(prestamo.getFechaHoraLimite());
+        prestamo.setDevolucionTardia(esTardia);
+
+
+        Recurso recurso = prestamo.getRecurso();
+        recurso.setEstadoOperativo(EstadoOperativo.DISPONIBLE);
+        recursoRepository.save(recurso);
+
+        return toResponse(prestamoRepository.save(prestamo));
+    }
+
+
+
 
     @Override
     public PrestamoResponseDTO actualizar(Long id, PrestamoRequestDTO dto) {
@@ -139,7 +194,8 @@ public class PrestamoServiceImpl implements PrestamoService {
                 prestamo.getRecurso().getNombre(),
                 prestamo.getUsuario().getId(),
                 prestamo.getUsuario().getNombre(),
-                prestamo.getReserva().getId()
+                prestamo.getReserva().getId(),
+                prestamo.getDevolucionTardia()
         );
     }
 }

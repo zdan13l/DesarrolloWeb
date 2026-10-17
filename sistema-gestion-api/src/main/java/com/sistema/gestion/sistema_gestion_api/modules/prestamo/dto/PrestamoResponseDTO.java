@@ -19,6 +19,7 @@ public record PrestamoResponseDTO(
         String recursoNombre,
         Long usuarioId,
         String usuarioNombre,
-        Long reservaId
+        Long reservaId,
+        Boolean devolucionTardia
 ) {
 }
