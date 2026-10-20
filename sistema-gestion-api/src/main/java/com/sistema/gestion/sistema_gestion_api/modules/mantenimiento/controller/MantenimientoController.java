@@ -46,6 +46,19 @@ public class MantenimientoController {
         return mantenimientoService.actualizar(id, dto);
     }
 
+    @PatchMapping("/{id}/finalizar")
+    @ResponseStatus(HttpStatus.OK)
+    public MantenimientoResponseDTO finalizar(@PathVariable Long id,
+                                              @RequestParam(defaultValue = "false") boolean habilitarRecurso) {
+        return mantenimientoService.finalizar(id, habilitarRecurso);
+    }
+
+    @PatchMapping("/{id}/cancelar")
+    @ResponseStatus(HttpStatus.OK)
+    public MantenimientoResponseDTO cancelar(@PathVariable Long id) {
+        return mantenimientoService.cancelar(id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

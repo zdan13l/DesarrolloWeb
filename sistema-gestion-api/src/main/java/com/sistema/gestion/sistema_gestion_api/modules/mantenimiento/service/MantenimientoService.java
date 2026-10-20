@@ -17,5 +17,9 @@ public interface MantenimientoService {
 
     MantenimientoResponseDTO actualizar(Long id, MantenimientoRequestDTO dto);
 
+    MantenimientoResponseDTO finalizar(Long id, boolean habilitarRecurso);
+
+    MantenimientoResponseDTO cancelar(Long id);
+
     void eliminar(Long id);
 }

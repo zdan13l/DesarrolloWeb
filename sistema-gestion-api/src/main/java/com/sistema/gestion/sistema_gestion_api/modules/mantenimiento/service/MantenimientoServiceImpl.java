@@ -10,6 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.sistema.gestion.sistema_gestion_api.modules.mantenimiento.model.EstadoMantenimiento;
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.EstadoOperativo;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -44,9 +49,17 @@ public class MantenimientoServiceImpl implements MantenimientoService {
     }
 
     @Override
+    @Transactional
     public MantenimientoResponseDTO crear(MantenimientoRequestDTO dto) {
         Mantenimiento mantenimiento = new Mantenimiento();
         aplicarDatos(mantenimiento, dto);
+        // RN: abrir una intervención bloquea el recurso hasta finalizarla
+        if (dto.estadoMantenimiento() == EstadoMantenimiento.ABIERTA
+                || dto.estadoMantenimiento() == EstadoMantenimiento.EN_PROCESO) {
+            Recurso recurso = mantenimiento.getRecurso();
+            recurso.setEstadoOperativo(EstadoOperativo.BLOQUEADO);
+            recursoRepository.save(recurso);
+        }
         return toResponse(mantenimientoRepository.save(mantenimiento));
     }
 
@@ -55,6 +68,40 @@ public class MantenimientoServiceImpl implements MantenimientoService {
         Mantenimiento mantenimiento = buscarEntidad(id);
         aplicarDatos(mantenimiento, dto);
         return toResponse(mantenimientoRepository.save(mantenimiento));
+    }
+
+    @Override
+    @Transactional
+    public MantenimientoResponseDTO finalizar(Long id, boolean habilitarRecurso) {
+        Mantenimiento mantenimiento = buscarEntidad(id);
+        validarAbierto(mantenimiento);
+        mantenimiento.setEstadoMantenimiento(EstadoMantenimiento.FINALIZADA);
+        mantenimiento.setFechaCierre(Instant.now());
+        if (habilitarRecurso) {
+            Recurso recurso = mantenimiento.getRecurso();
+            recurso.setEstadoOperativo(EstadoOperativo.DISPONIBLE);
+            recursoRepository.save(recurso);
+        }
+        return toResponse(mantenimientoRepository.save(mantenimiento));
+    }
+
+    @Override
+    @Transactional
+    public MantenimientoResponseDTO cancelar(Long id) {
+        Mantenimiento mantenimiento = buscarEntidad(id);
+        validarAbierto(mantenimiento);
+        mantenimiento.setEstadoMantenimiento(EstadoMantenimiento.CANCELADA);
+        mantenimiento.setFechaCierre(Instant.now());
+        return toResponse(mantenimientoRepository.save(mantenimiento));
+    }
+
+    private void validarAbierto(Mantenimiento mantenimiento) {
+        if (mantenimiento.getEstadoMantenimiento() == EstadoMantenimiento.FINALIZADA
+                || mantenimiento.getEstadoMantenimiento() == EstadoMantenimiento.CANCELADA) {
+            // No se puede cambiar una intervención que ya fue cerrada
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El mantenimiento ya está " + mantenimiento.getEstadoMantenimiento());
+        }
     }
 
     @Override
