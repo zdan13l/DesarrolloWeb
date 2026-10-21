@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { Pendiente } from '../../shared/pendiente/pendiente';
+import { RecursoForm } from './recurso-form';
 
-/** Grupo 2. Cuelga de `/recursos` (formulario de recurso). Reemplaza `Pendiente` por tus componentes. */
+/** Grupo 2. Cuelga de `/recursos` (formulario de recurso). */
 export const RECURSOS_ROUTES: Routes = [
-  { path: 'nuevo', component: Pendiente, data: { titulo: 'Nuevo recurso', grupo: 2 } },
-  { path: ':id/editar', component: Pendiente, data: { titulo: 'Editar recurso', grupo: 2 } },
+  { path: 'nuevo', component: RecursoForm, data: { titulo: 'Nuevo recurso', grupo: 2 } },
+  { path: ':id/editar', component: RecursoForm, data: { titulo: 'Editar recurso', grupo: 2 } },
 ];

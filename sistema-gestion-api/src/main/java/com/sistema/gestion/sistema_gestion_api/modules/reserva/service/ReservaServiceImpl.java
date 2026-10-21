@@ -61,6 +61,7 @@ public class ReservaServiceImpl implements ReservaService {
     }
 
     @Override
+    @Transactional
     public ReservaResponseDTO crear(ReservaRequestDTO dto) {
         validarCoherenciaFechas(dto.fechaHoraInicio(), dto.fechaHoraFin());
 
@@ -76,6 +77,7 @@ public class ReservaServiceImpl implements ReservaService {
     }
 
     @Override
+    @Transactional
     public ReservaResponseDTO actualizar(Long id, ReservaRequestDTO dto) {
         Reserva reserva = buscarEntidad(id);
 
@@ -176,7 +178,6 @@ public class ReservaServiceImpl implements ReservaService {
     private void aplicarDatos(Reserva reserva, ReservaRequestDTO dto, Recurso recurso) {
         reserva.setFechaHoraInicio(dto.fechaHoraInicio());
         reserva.setFechaHoraFin(dto.fechaHoraFin());
-        reserva.setEstadoReserva(dto.estadoReserva());
         reserva.setRecurso(recurso);
         reserva.setUsuario(buscarUsuario(dto.usuarioId()));
     }
