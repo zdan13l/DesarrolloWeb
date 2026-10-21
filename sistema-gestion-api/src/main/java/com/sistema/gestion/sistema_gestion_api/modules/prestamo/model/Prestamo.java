@@ -29,7 +29,7 @@ public class Prestamo {
     private EstadoFisico estadoInicial;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "estado_final", nullable = false)
+    @Column(name = "estado_final")
     private EstadoFisico estadoFinal;
 
     @Column(nullable = false)

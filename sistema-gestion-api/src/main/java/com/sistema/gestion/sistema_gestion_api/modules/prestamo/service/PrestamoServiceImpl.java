@@ -74,11 +74,18 @@ public class PrestamoServiceImpl implements PrestamoService {
     }
 
     @Override
+    @Transactional
     public PrestamoResponseDTO crear(PrestamoRequestDTO dto) {
         Recurso recurso = buscarRecurso(dto.recursoId());
 
         if (recurso.getEstadoOperativo() == EstadoOperativo.BLOQUEADO) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El recurso está BLOQUEADO y no puede ser prestado");
+        }
+
+        // RN-03: un recurso prestado no puede entregarse nuevamente hasta su devolución.
+        if (recurso.getEstadoOperativo() == EstadoOperativo.PRESTADO) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El recurso ya se encuentra PRESTADO; debe registrarse su devolución antes de entregarlo nuevamente");
         }
 
         if (recurso.getModalidadRecurso() != ModalidadRecurso.PRESTABLE && recurso.getModalidadRecurso() != ModalidadRecurso.AMBAS) {
@@ -88,6 +95,7 @@ public class PrestamoServiceImpl implements PrestamoService {
         Prestamo prestamo = new Prestamo();
         aplicarDatos(prestamo, dto);
         prestamo.setEstadoPrestamo(EstadoPrestamo.ACTIVO);
+        prestamo.setDevolucionTardia(false);
 
         recurso.setEstadoOperativo(EstadoOperativo.PRESTADO);
         recursoRepository.save(recurso);
@@ -131,6 +139,7 @@ public class PrestamoServiceImpl implements PrestamoService {
 
 
     @Override
+    @Transactional
     public PrestamoResponseDTO actualizar(Long id, PrestamoRequestDTO dto) {
         Prestamo prestamo = buscarEntidad(id);
         aplicarDatos(prestamo, dto);
@@ -148,12 +157,9 @@ public class PrestamoServiceImpl implements PrestamoService {
     private void aplicarDatos(Prestamo prestamo, PrestamoRequestDTO dto) {
         prestamo.setFechaHoraEntrega(dto.fechaHoraEntrega());
         prestamo.setFechaHoraLimite(dto.fechaHoraLimite());
-        prestamo.setFechaHoraDevolucion(dto.fechaHoraDevolucion());
         prestamo.setEstadoInicial(dto.estadoInicial());
-        prestamo.setEstadoFinal(dto.estadoFinal());
         prestamo.setObservaciones(dto.observaciones());
         prestamo.setAccesorios(dto.accesorios());
-        prestamo.setEstadoPrestamo(dto.estadoPrestamo());
         prestamo.setRecurso(buscarRecurso(dto.recursoId()));
         prestamo.setUsuario(buscarUsuario(dto.usuarioId()));
         prestamo.setReserva(buscarReserva(dto.reservaId()));
