@@ -1,0 +1,55 @@
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+
+<div class="marco">
+  <header class="barra">
+    <button
+      type="button"
+      class="barra__menu"
+      aria-controls="menu-lateral"
+      [attr.aria-expanded]="menuAbierto()"
+      aria-label="Abrir o cerrar el menú"
+      (click)="alternarMenu()"
+    >
+      ☰
+    </button>
+    <span class="barra__marca">PontiReservas</span>
+  </header>
+
+  <aside id="menu-lateral" class="lateral" [class.lateral--abierto]="menuAbierto()">
+    <a class="lateral__marca" routerLink="/">PontiReservas</a>
+    <nav aria-label="Navegación principal">
+      @for (seccion of secciones; track $index) {
+        <div class="lateral__seccion">
+          @if (seccion.titulo) {
+            <p class="lateral__titulo">{{ seccion.titulo }}</p>
+          }
+          <ul>
+            @for (enlace of seccion.enlaces; track enlace.ruta) {
+              <li>
+                <a
+                  class="lateral__enlace"
+                  [routerLink]="enlace.ruta"
+                  routerLinkActive="lateral__enlace--activo"
+                  [routerLinkActiveOptions]="{ exact: !!enlace.exacto }"
+                >
+                  {{ enlace.etiqueta }}
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </nav>
+  </aside>
+
+  @if (menuAbierto()) {
+    <div class="fondo" (click)="cerrarMenu()" aria-hidden="true"></div>
+  }
+
+  <main id="contenido" class="contenido">
+    <router-outlet />
+  </main>
+</div>
+
+<app-toast-container />
+<app-confirm-dialog />

@@ -1,0 +1,160 @@
+:host {
+  display: block;
+}
+
+.saltar {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 1100;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--primary);
+  color: var(--primary-contraste);
+}
+
+.saltar:focus {
+  top: 8px;
+}
+
+.marco {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--ancho-lateral) 1fr;
+  grid-template-areas: 'lateral contenido';
+}
+
+.barra {
+  display: none;
+}
+
+.lateral {
+  grid-area: lateral;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 20px 14px;
+  background: var(--lateral-fondo);
+  color: var(--lateral-texto);
+}
+
+.lateral__marca {
+  display: block;
+  margin: 0 8px 24px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--lateral-texto);
+  text-decoration: none;
+}
+
+.lateral ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lateral__seccion + .lateral__seccion {
+  margin-top: 20px;
+}
+
+.lateral__titulo {
+  margin: 0 8px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+
+.lateral__enlace {
+  display: block;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--lateral-texto);
+  text-decoration: none;
+}
+
+.lateral__enlace:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+.lateral__enlace--activo {
+  background: rgb(255 255 255 / 0.18);
+  font-weight: 600;
+}
+
+.contenido {
+  grid-area: contenido;
+  min-width: 0;
+  padding: 28px 32px 48px;
+}
+
+.fondo {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .marco {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'contenido';
+  }
+
+  .barra {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--lateral-fondo);
+    color: var(--lateral-texto);
+  }
+
+  .barra__menu {
+    border: 1px solid rgb(255 255 255 / 0.4);
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+
+  .barra__marca {
+    font-weight: 700;
+  }
+
+  .lateral {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1000;
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .lateral--abierto {
+    transform: none;
+  }
+
+  .fondo {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    background: rgb(0 0 0 / 0.45);
+  }
+
+  .contenido {
+    padding: 20px 16px 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lateral {
+    transition: none;
+  }
+}

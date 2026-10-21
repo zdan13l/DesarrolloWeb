@@ -1,0 +1,251 @@
+/*
+ * Estilos globales compartidos por todas las pantallas: variables de color, formularios, botones y tarjetas.
+ * Las pantallas solo deben usar estas clases y variables; no redefinirlas.
+ */
+
+:root {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --text: #1b2333;
+  --muted: #566176;
+  --border: #d9dee8;
+  --primary: #12408f;
+  --primary-contraste: #ffffff;
+  --primary-soft: #e4ecfa;
+  --ok: #146c43;
+  --ok-soft: #dff3e8;
+  --warn: #8a5300;
+  --warn-soft: #fbeccb;
+  --danger: #b3261e;
+  --danger-soft: #fbe3e0;
+  --neutral-soft: #eceff4;
+  --lateral-fondo: #0d2d63;
+  --lateral-texto: #f3f6fc;
+  --ancho-lateral: 248px;
+  --radius: 10px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121722;
+    --surface: #1b2230;
+    --text: #e8ecf4;
+    --muted: #a3adbf;
+    --border: #2f3a4e;
+    --primary: #7aa5f2;
+    --primary-contraste: #0b1426;
+    --primary-soft: #1d2d4d;
+    --ok: #6fd1a0;
+    --ok-soft: #173a2a;
+    --warn: #f0be63;
+    --warn-soft: #3d2f12;
+    --danger: #f19b94;
+    --danger-soft: #45201d;
+    --neutral-soft: #252e3f;
+    --lateral-fondo: #0a1a38;
+    color-scheme: dark;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+}
+
+a {
+  color: var(--primary);
+}
+
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ---------- Estructura de página ---------- */
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.card + .card {
+  margin-top: 16px;
+}
+
+.texto-suave {
+  color: var(--muted);
+}
+
+/* ---------- Botones ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--primary);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn--primario {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-contraste);
+}
+
+.btn--peligro {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: var(--surface);
+}
+
+.btn--pequeno {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 0.875rem;
+}
+
+/* ---------- Formularios ---------- */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-field label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: auto;
+  min-height: 0;
+}
+
+.form-field--error input,
+.form-field--error select,
+.form-field--error textarea {
+  border-color: var(--danger);
+}
+
+.form-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* Mensaje en línea para errores que la propia pantalla muestra (p. ej. el 409 de una reserva). */
+.alerta {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.alerta--error {
+  border-left-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.alerta--exito {
+  border-left-color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.alerta--aviso {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

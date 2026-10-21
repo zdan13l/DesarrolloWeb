@@ -1,0 +1,57 @@
+<div class="tabla-contenedor" role="region" tabindex="0" aria-label="Tabla de datos">
+  <table class="tabla">
+    <thead>
+      <tr>
+        @for (columna of columnas(); track columna.clave) {
+          <th scope="col">{{ columna.etiqueta }}</th>
+        }
+        @if (acciones()) {
+          <th scope="col">Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @if (cargando()) {
+        <tr>
+          <td class="tabla__mensaje" [attr.colspan]="columnas().length + (acciones() ? 1 : 0)">Cargando…</td>
+        </tr>
+      } @else {
+        @for (fila of filas(); track $index) {
+          <tr>
+            @for (columna of columnas(); track columna.clave) {
+              <td [attr.data-etiqueta]="columna.etiqueta">
+                @switch (columna.tipo) {
+                  @case ('fecha') {
+                    {{ (comoFecha(valorDe(fila, columna)) | date: 'dd/MM/yyyy HH:mm') ?? '—' }}
+                  }
+                  @case ('estado') {
+                    <app-status-badge [estado]="comoEstado(valorDe(fila, columna))" />
+                  }
+                  @case ('booleano') {
+                    {{ comoBooleano(valorDe(fila, columna)) }}
+                  }
+                  @default {
+                    {{ comoTexto(valorDe(fila, columna)) }}
+                  }
+                }
+              </td>
+            }
+            @if (acciones(); as plantilla) {
+              <td data-etiqueta="Acciones">
+                <div class="tabla__acciones">
+                  <ng-container [ngTemplateOutlet]="plantilla" [ngTemplateOutletContext]="{ $implicit: fila }" />
+                </div>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td class="tabla__mensaje" [attr.colspan]="columnas().length + (acciones() ? 1 : 0)">
+              {{ mensajeVacio() }}
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

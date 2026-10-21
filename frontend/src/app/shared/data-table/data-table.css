@@ -1,0 +1,93 @@
+.tabla-contenedor {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.tabla th {
+  background: var(--neutral-soft);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabla td.tabla__mensaje {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px 14px;
+}
+
+.tabla__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* En teléfono cada fila pasa a ser una tarjeta con "Etiqueta: valor". */
+@media (max-width: 640px) {
+  .tabla thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .tabla,
+  .tabla tbody,
+  .tabla tr,
+  .tabla td {
+    display: block;
+  }
+
+  .tabla tbody tr {
+    border-bottom: 1px solid var(--border);
+    padding: 6px 0;
+  }
+
+  .tabla td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border: 0;
+    padding: 6px 14px;
+    text-align: right;
+  }
+
+  .tabla td[data-etiqueta]::before {
+    content: attr(data-etiqueta);
+    color: var(--muted);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .tabla td.tabla__mensaje {
+    display: block;
+    text-align: center;
+  }
+
+  .tabla td.tabla__mensaje::before {
+    content: none;
+  }
+}
