@@ -26,7 +26,6 @@ export class IncidenteForm {
   protected readonly tipos = TIPOS_INCIDENTE;
   protected readonly severidades = SEVERIDADES;
 
-  // Los desplegables se cargan en paralelo, antes de que el usuario llegue a ellos.
   protected readonly recursos = toSignal(this.servicio.recursos().pipe(catchError(() => of([]))), {
     initialValue: [],
   });
@@ -80,7 +79,7 @@ export class IncidenteForm {
       .pipe(finalize(() => this.enviando.set(false)))
       .subscribe({
         next: (incidente) => this.reportado.set(incidente),
-        error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+        error: () => undefined,
       });
   }
 

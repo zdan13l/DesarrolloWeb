@@ -1,10 +1,6 @@
 import { Component, input } from '@angular/core';
 
-/**
- * Página de relleno para las rutas que aún no tienen su pantalla.
- * Cada grupo la reemplaza por su componente en su archivo *.routes.ts.
- * Recibe `titulo` y `grupo` desde `data` de la ruta.
- */
+/** Página de relleno para una ruta sin pantalla; muestra el `titulo` y el `grupo` recibidos desde `data`. */
 @Component({
   selector: 'app-pendiente',
   template: `

@@ -55,7 +55,7 @@ export class MantenimientoForm {
           this.toast.exito(`Mantenimiento abierto: «${mantenimiento.recursoNombre}» quedó bloqueado.`);
           void this.router.navigate(['/mantenimientos', mantenimiento.id]);
         },
-        error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+        error: () => undefined,
       });
   }
 }

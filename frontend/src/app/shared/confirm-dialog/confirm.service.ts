@@ -15,13 +15,7 @@ export interface ConfirmacionPendiente {
   resolver: (aceptada: boolean) => void;
 }
 
-/**
- * Abre el diálogo de confirmación del layout. Emite una sola vez `true` o `false`.
- *
- *   this.confirm.confirmar({ titulo: 'Cancelar reserva', mensaje: '...', peligro: true })
- *     .pipe(filter(Boolean), switchMap(() => this.reservas.cancelar(id)))
- *     .subscribe(...)
- */
+/** Abre el diálogo de confirmación del layout y emite una sola vez `true` si se acepta o `false` si no. */
 @Injectable({ providedIn: 'root' })
 export class ConfirmService {
   private readonly _pendiente = signal<ConfirmacionPendiente | null>(null);

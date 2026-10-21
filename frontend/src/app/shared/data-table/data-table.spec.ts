@@ -39,15 +39,15 @@ describe('DataTable', () => {
     expect(filas).toHaveLength(2);
     const primera = filas[0].textContent ?? '';
     expect(primera).toContain('Sala 1');
-    expect(primera).toContain('Bloqueado'); // badge
-    expect(primera).toMatch(/12\/10\/2026/); // fecha
+    expect(primera).toContain('Bloqueado');
+    expect(primera).toMatch(/12\/10\/2026/);
     expect(primera).toContain('Sí');
-    expect(primera).toContain('6'); // columna calculada
+    expect(primera).toContain('6');
     expect(filas[0].querySelector('.accion')?.textContent).toContain('Editar Sala 1');
 
     const segunda = filas[1].textContent ?? '';
     expect(segunda).toContain('En proceso');
-    expect(segunda).toContain('—'); // fecha y booleano nulos
+    expect(segunda).toContain('—');
   });
 
   it('muestra el mensaje cuando no hay filas', async () => {

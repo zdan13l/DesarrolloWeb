@@ -1,4 +1,4 @@
-// Producción: Angular compilado y servido desde `static` de Spring Boot, mismo origen que la API.
+// Producción: la SPA se sirve desde Spring Boot, en el mismo origen que la API.
 export const environment = {
   apiUrl: '/api',
 };

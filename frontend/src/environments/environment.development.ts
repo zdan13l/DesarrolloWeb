@@ -1,4 +1,4 @@
-// Desarrollo (`ng serve`, puerto 4200): la API corre en el 8080 y habilita CORS para este origen.
+// Desarrollo (`ng serve`): la API corre en el puerto 8080.
 export const environment = {
   apiUrl: 'http://localhost:8080/api',
 };

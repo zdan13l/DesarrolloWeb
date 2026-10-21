@@ -87,7 +87,7 @@ export class CategoriasPage {
         this.editando.set(null);
         this.recargar$.next();
       },
-      error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+      error: () => undefined,
     });
   }
 
@@ -109,7 +109,7 @@ export class CategoriasPage {
           if (this.editando() === categoria) this.editando.set(null);
           this.recargar$.next();
         },
-        error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+        error: () => undefined,
       });
   }
 }

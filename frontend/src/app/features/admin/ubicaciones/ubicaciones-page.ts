@@ -101,7 +101,7 @@ export class UbicacionesPage {
         this.editando.set(null);
         this.recargar$.next();
       },
-      error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+      error: () => undefined,
     });
   }
 
@@ -123,7 +123,7 @@ export class UbicacionesPage {
           if (this.editando() === ubicacion) this.editando.set(null);
           this.recargar$.next();
         },
-        error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+        error: () => undefined,
       });
   }
 }

@@ -7,7 +7,7 @@ import { catchError, finalize, of, switchMap } from 'rxjs';
 import { ErrorApi, leerErrorApi } from '../../core/models/api-error';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
 import { ToastService } from '../../shared/toast/toast.service';
-import { EstadoFisico, Prestamo } from './prestamo.model';
+import { EstadoFisico } from './prestamo.model';
 import { PrestamoService } from './prestamo.service';
 
 /** CU6. Registrar la devolución de un préstamo activo. */
@@ -107,7 +107,6 @@ export class PrestamoDevolucion {
     toObservable(this.id).pipe(
       switchMap((id) => this.servicio.obtener(id).pipe(catchError(() => of(null)))),
     ),
-    { initialValue: undefined as Prestamo | null | undefined },
   );
 
   protected readonly form = new FormGroup({

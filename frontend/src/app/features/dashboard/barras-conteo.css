@@ -34,7 +34,6 @@
   background: var(--neutral-soft);
 }
 
-/* Texto siempre en tinta de texto; el color de la serie solo lo lleva la barra. */
 .barras__nombre {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -42,14 +41,14 @@
   color: var(--text);
 }
 
-/* Eje: línea base de un pixel desde la que crecen todas las barras. */
+/* Línea base de la que crecen las barras. */
 .barras__pista {
   display: block;
   height: 16px;
   border-left: 1px solid var(--viz-base, #c3c2b7);
 }
 
-/* Barra delgada (16px), extremo de datos redondeado de 4px y lado de la base recto. */
+/* Barra de 16px con el extremo de datos redondeado. */
 .barras__barra {
   display: block;
   height: 100%;

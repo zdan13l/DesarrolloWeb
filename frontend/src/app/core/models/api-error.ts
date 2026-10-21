@@ -19,10 +19,7 @@ export interface ErrorApi {
 const MENSAJE_SIN_CONEXION =
   'No se pudo conectar con el servidor. Verifica que el backend esté en ejecución.';
 
-/**
- * Normaliza cualquier error de HttpClient al formato único del backend.
- * Si la respuesta no trae ese formato (servidor caído, error inesperado) arma uno equivalente.
- */
+/** Convierte cualquier error de HttpClient al formato de error del backend. */
 export function leerErrorApi(err: unknown): ErrorApi {
   if (!(err instanceof HttpErrorResponse)) {
     return { status: 0, message: 'Ocurrió un error inesperado.', errors: [] };

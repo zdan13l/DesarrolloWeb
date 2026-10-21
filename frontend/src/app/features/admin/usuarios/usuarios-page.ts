@@ -108,7 +108,7 @@ export class UsuariosPage {
         this.editando.set(null);
         this.recargar$.next();
       },
-      error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+      error: () => undefined,
     });
   }
 
@@ -130,7 +130,7 @@ export class UsuariosPage {
           if (this.editando() === usuario) this.editando.set(null);
           this.recargar$.next();
         },
-        error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+        error: () => undefined,
       });
   }
 }

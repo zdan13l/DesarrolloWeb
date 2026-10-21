@@ -3,7 +3,7 @@ import { MantenimientoDetalle } from './mantenimiento-detalle';
 import { MantenimientoForm } from './mantenimiento-form';
 import { MantenimientosLista } from './mantenimientos-lista';
 
-/** Grupo 3. Cuelga de `/mantenimientos`. `nuevo` va antes de `:id` para que no se tome como un identificador. */
+// `nuevo` va antes de `:id` para que no se tome como un identificador.
 export const MANTENIMIENTOS_ROUTES: Routes = [
   { path: '', component: MantenimientosLista },
   { path: 'nuevo', component: MantenimientoForm },

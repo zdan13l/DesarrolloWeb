@@ -2,11 +2,7 @@ import { Component, computed, input, signal } from '@angular/core';
 import { Columna, DataTable } from '../../shared/data-table/data-table';
 import { Conteo } from './indicador.model';
 
-/**
- * Gráfico de barras horizontales de una sola serie (reservas por recurso o por categoría).
- * Una serie no necesita leyenda: el título dice qué se mide. El valor va en la punta de cada barra
- * y la misma información está disponible como tabla.
- */
+/** Gráfico de barras horizontales de reservas por recurso o por categoría, con vista alternativa en tabla. */
 @Component({
   selector: 'app-barras-conteo',
   imports: [DataTable],

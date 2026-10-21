@@ -21,7 +21,6 @@ describe('rutas de la SPA', () => {
     });
   });
 
-  // Cada ruta del Word (sección 6.2) debe resolver a su pantalla, con el layout alrededor.
   const casos: [string, string][] = [
     ['/', 'Tablero'],
     ['/catalogo', 'Catálogo'],

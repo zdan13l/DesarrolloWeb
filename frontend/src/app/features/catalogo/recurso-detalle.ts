@@ -4,7 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, map, of, switchMap, tap } from 'rxjs';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
-import { FranjaOcupada, Recurso } from './recurso.model';
+import { FranjaOcupada } from './recurso.model';
 import { RecursoService } from './recurso.service';
 
 /** Fecha local de hoy como YYYY-MM-DD (valor de un `<input type="date">`). */
@@ -127,7 +127,6 @@ export class RecursoDetalle {
     toObservable(this.id).pipe(
       switchMap((id) => this.servicio.obtener(id).pipe(catchError(() => of(null)))),
     ),
-    { initialValue: undefined as Recurso | null | undefined },
   );
 
   /** Cada cambio de recurso o de día cancela la consulta anterior (switchMap) y pide la nueva. */

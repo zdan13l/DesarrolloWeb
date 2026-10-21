@@ -27,10 +27,7 @@ interface Seguimiento {
   recurso: RecursoOpcion;
 }
 
-/**
- * Seguimiento de un mantenimiento (`/mantenimientos/:id`): editar el diagnóstico, pasarlo a EN_PROCESO,
- * finalizarlo (decidiendo si el recurso queda DISPONIBLE, RN-05) o cancelarlo.
- */
+/** Seguimiento de un mantenimiento: editarlo, pasarlo a EN_PROCESO, finalizarlo o cancelarlo. */
 @Component({
   selector: 'app-mantenimiento-detalle',
   imports: [ReactiveFormsModule, RouterLink, DatePipe, StatusBadge],
@@ -175,7 +172,7 @@ export class MantenimientoDetalle {
         this.finalizando.set(false);
         this.recargar$.next();
       },
-      error: () => undefined, // el interceptor ya mostró el mensaje del servidor
+      error: () => undefined,
     });
   }
 }

@@ -19,10 +19,7 @@ export interface Mantenimiento {
   recursoNombre: string;
 }
 
-/**
- * Cuerpo de POST y PUT. El estado inicial (ABIERTA) y las fechas las fija el servidor;
- * `estadoMantenimiento` solo se envía en un PUT para pasar a EN_PROCESO.
- */
+/** Cuerpo de POST y PUT. El servidor fija el estado inicial y las fechas; `estadoMantenimiento` solo se usa en un PUT para pasar a EN_PROCESO. */
 export interface MantenimientoRequest {
   diagnostico: string;
   observaciones: string;

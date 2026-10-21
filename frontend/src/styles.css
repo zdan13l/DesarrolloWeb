@@ -1,7 +1,4 @@
-/*
- * Estilos globales compartidos por todas las pantallas: variables de color, formularios, botones y tarjetas.
- * Las pantallas solo deben usar estas clases y variables; no redefinirlas.
- */
+/* Variables de color y clases compartidas: botones, tarjetas, formularios y alertas. */
 
 :root {
   --bg: #f4f6fa;

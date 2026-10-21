@@ -12,12 +12,7 @@ export interface Columna<T> {
   valor?: (fila: T) => unknown;
 }
 
-/**
- * Tabla genérica. Las acciones por fila (editar, cancelar...) se pasan como plantilla:
- *
- *   <app-data-table [columnas]="columnas" [filas]="reservas()" [acciones]="acc" />
- *   <ng-template #acc let-reserva><button ...>Cancelar</button></ng-template>
- */
+/** Tabla genérica; las acciones por fila se pasan como plantilla en `acciones`. */
 @Component({
   selector: 'app-data-table',
   imports: [DatePipe, NgTemplateOutlet, StatusBadge],

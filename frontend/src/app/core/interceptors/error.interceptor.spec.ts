@@ -30,7 +30,7 @@ describe('errorInterceptor', () => {
     );
 
     expect(toast.toasts().map((t) => t.mensaje)).toEqual(['El recurso no está disponible en el horario solicitado']);
-    expect(fallo).toBeTruthy(); // el error original se relanza para el componente
+    expect(fallo).toBeTruthy();
   });
 
   it('lista cada campo inválido de un 400', () => {

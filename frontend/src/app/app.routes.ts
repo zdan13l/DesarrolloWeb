@@ -2,11 +2,8 @@ import { Routes } from '@angular/router';
 import { Shell } from './core/layout/shell/shell';
 import { NotFound } from './shared/not-found/not-found';
 
-/*
- * Cada área funcional se carga de forma perezosa desde su propio archivo de rutas, así cada grupo
- * edita solo el suyo y este archivo no cambia. Los datos `titulo` y `grupo` de las rutas llegan como
- * inputs a los componentes (withComponentInputBinding), igual que los parámetros como `:id`.
- */
+// Cada área se carga de forma perezosa desde su archivo de rutas. Los `data` y los parámetros de ruta
+// llegan como inputs de los componentes (withComponentInputBinding).
 export const routes: Routes = [
   {
     path: '',

@@ -1,7 +1,4 @@
-/*
- * Colores de visualización del tablero. La serie de los gráficos es un solo azul; los estados usan
- * la paleta de estado fija (bueno, aviso, crítico) siempre acompañada de icono y etiqueta.
- */
+/* Colores del tablero: un azul para las barras y la paleta de estado para las fichas. */
 :host {
   display: block;
   --viz-serie: #2a78d6;
@@ -84,7 +81,6 @@
   background: var(--viz-critico);
 }
 
-/* Cifras grandes con números proporcionales (no tabulares). */
 .ficha__valor {
   font-size: 1.875rem;
   font-weight: 600;

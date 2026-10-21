@@ -18,7 +18,7 @@ type Vista = { tipo: 'cargando' } | { tipo: 'error' } | { tipo: 'listo' };
 interface Ficha {
   estado: EstadoRecurso;
   etiqueta: string;
-  /** Icono de la marca: el estado nunca se comunica solo con color. */
+  /** Icono que acompaña al color de la ficha. */
   icono: string;
   tono: 'bueno' | 'info' | 'aviso' | 'critico';
 }

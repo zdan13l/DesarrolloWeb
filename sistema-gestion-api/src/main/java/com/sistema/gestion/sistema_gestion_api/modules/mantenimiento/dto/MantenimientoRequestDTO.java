@@ -6,11 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
 
-/**
- * Solicitud de apertura (POST) o actualización (PUT) de un mantenimiento.
- * El servidor fija el estado inicial (ABIERTA) y la fecha de cierre; el cliente solo puede enviar
- * {@code estadoMantenimiento} en un PUT para pasar de ABIERTA a EN_PROCESO.
- */
+/** Apertura (POST) o actualización (PUT). El servidor fija el estado inicial y las fechas; `estadoMantenimiento` solo sirve en un PUT para pasar a EN_PROCESO. */
 public record MantenimientoRequestDTO(
         /** Opcional: si no llega se usa la hora actual. */
         Instant fechaApertura,

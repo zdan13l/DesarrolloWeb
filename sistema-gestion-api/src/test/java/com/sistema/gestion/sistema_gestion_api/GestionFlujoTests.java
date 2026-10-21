@@ -19,10 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Flujo de incidentes, mantenimientos y datos maestros (RN-04, RN-05 y borrados con 409).
- * Usa una base H2 en memoria con los datos del DataSeeder; cada prueba se revierte al terminar.
- */
+/** Pruebas de incidentes, mantenimientos y datos maestros sobre H2 en memoria con los datos del DataSeeder. */
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:gestion-flujo;DB_CLOSE_DELAY=-1")
 @AutoConfigureMockMvc
 @Transactional
@@ -35,8 +32,6 @@ class GestionFlujoTests {
 
     @Autowired
     private MockMvc mvc;
-
-    // ---------- Incidentes (RN-04) ----------
 
     @Test
     void incidenteCriticoBloqueaElRecurso() throws Exception {
@@ -75,8 +70,6 @@ class GestionFlujoTests {
         mvc.perform(get("/api/recursos/" + recurso))
                 .andExpect(jsonPath("$.estadoOperativo").value("BLOQUEADO"));
     }
-
-    // ---------- Mantenimientos (RN-05) ----------
 
     @Test
     void abrirMantenimientoBloqueaElRecursoYFijaElEstadoInicial() throws Exception {
@@ -184,8 +177,6 @@ class GestionFlujoTests {
                 .andExpect(status().isCreated());
     }
 
-    // ---------- Datos maestros ----------
-
     @Test
     void noSeEliminaUnaCategoriaConRecursos() throws Exception {
         mvc.perform(delete("/api/categorias/" + CATEGORIA))
@@ -234,8 +225,6 @@ class GestionFlujoTests {
                 .andExpect(jsonPath("$[0].nombre").value("Solicitante"));
     }
 
-    // ---------- Formato único de error ----------
-
     @Test
     void laValidacionResponde400ConUnElementoPorCampo() throws Exception {
         mvc.perform(json(post("/api/usuarios"), "{\"nombre\":\"\",\"apellido\":\"X\",\"correo\":\"no-es-correo\",\"activo\":true,\"rolId\":1}"))
@@ -244,8 +233,6 @@ class GestionFlujoTests {
                 .andExpect(jsonPath("$.errors[?(@.campo=='nombre')]").exists())
                 .andExpect(jsonPath("$.errors[?(@.campo=='correo')]").exists());
     }
-
-    // ---------- Utilidades ----------
 
     private long crearRecurso(String estado) throws Exception {
         String body = """
