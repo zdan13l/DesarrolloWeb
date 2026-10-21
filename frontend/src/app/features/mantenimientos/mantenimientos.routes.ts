@@ -1,9 +1,11 @@
 import { Routes } from '@angular/router';
-import { Pendiente } from '../../shared/pendiente/pendiente';
+import { MantenimientoDetalle } from './mantenimiento-detalle';
+import { MantenimientoForm } from './mantenimiento-form';
+import { MantenimientosLista } from './mantenimientos-lista';
 
-/** Grupo 3. Cuelga de `/mantenimientos`. Reemplaza `Pendiente` por tus componentes. */
+/** Grupo 3. Cuelga de `/mantenimientos`. `nuevo` va antes de `:id` para que no se tome como un identificador. */
 export const MANTENIMIENTOS_ROUTES: Routes = [
-  { path: '', component: Pendiente, data: { titulo: 'Mantenimientos', grupo: 3 } },
-  { path: 'nuevo', component: Pendiente, data: { titulo: 'Abrir mantenimiento', grupo: 3 } },
-  { path: ':id', component: Pendiente, data: { titulo: 'Seguimiento del mantenimiento', grupo: 3 } },
+  { path: '', component: MantenimientosLista },
+  { path: 'nuevo', component: MantenimientoForm },
+  { path: ':id', component: MantenimientoDetalle },
 ];

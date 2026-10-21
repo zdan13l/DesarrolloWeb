@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router';
-import { Pendiente } from '../../shared/pendiente/pendiente';
+import { IncidenteForm } from './incidente-form';
+import { IncidentesLista } from './incidentes-lista';
 
-/** Grupo 3. Cuelga de `/incidentes`. Reemplaza `Pendiente` por tus componentes. */
+/** Grupo 3. Cuelga de `/incidentes`. */
 export const INCIDENTES_ROUTES: Routes = [
-  { path: '', component: Pendiente, data: { titulo: 'Incidentes', grupo: 3 } },
-  { path: 'reportar', component: Pendiente, data: { titulo: 'Reportar incidente', grupo: 3 } },
+  { path: '', component: IncidentesLista },
+  { path: 'reportar', component: IncidenteForm },
 ];

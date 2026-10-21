@@ -1,0 +1,85 @@
+<header class="page-header">
+  <h1>Usuarios</h1>
+  <button type="button" class="btn btn--primario" (click)="nuevo()">Nuevo usuario</button>
+</header>
+
+@if (editando() !== null) {
+  <form class="card" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+    <h2 style="margin-top: 0; font-size: 1.0625rem">
+      {{ editando() === 'nuevo' ? 'Nuevo usuario' : 'Editar usuario' }}
+    </h2>
+    <div class="form-grid">
+      <div class="form-field" [class.form-field--error]="invalido('nombre')">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" formControlName="nombre" maxlength="255" [attr.aria-invalid]="invalido('nombre')" />
+        @if (invalido('nombre')) {
+          <p class="form-error">El nombre es obligatorio.</p>
+        }
+      </div>
+      <div class="form-field" [class.form-field--error]="invalido('apellido')">
+        <label for="apellido">Apellido</label>
+        <input
+          id="apellido"
+          type="text"
+          formControlName="apellido"
+          maxlength="255"
+          [attr.aria-invalid]="invalido('apellido')"
+        />
+        @if (invalido('apellido')) {
+          <p class="form-error">El apellido es obligatorio.</p>
+        }
+      </div>
+      <div class="form-field" [class.form-field--error]="invalido('correo')">
+        <label for="correo">Correo</label>
+        <input
+          id="correo"
+          type="email"
+          formControlName="correo"
+          maxlength="255"
+          autocomplete="off"
+          [attr.aria-invalid]="invalido('correo')"
+        />
+        @if (invalido('correo')) {
+          <p class="form-error">Escribe un correo válido.</p>
+        }
+      </div>
+      <div class="form-field" [class.form-field--error]="invalido('rolId')">
+        <label for="rol">Rol</label>
+        <select id="rol" formControlName="rolId" [attr.aria-invalid]="invalido('rolId')">
+          <option [ngValue]="null" disabled>Selecciona un rol</option>
+          @for (rol of roles(); track rol.id) {
+            <option [ngValue]="rol.id">{{ rol.nombre }}</option>
+          }
+        </select>
+        @if (invalido('rolId')) {
+          <p class="form-error">Elige el rol del usuario.</p>
+        }
+      </div>
+    </div>
+    <label style="display: flex; align-items: center; gap: 8px; margin-top: 16px">
+      <input type="checkbox" formControlName="activo" />
+      <span>Usuario activo</span>
+    </label>
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="cerrarFormulario()">Cancelar</button>
+      <button type="submit" class="btn btn--primario" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+}
+
+<div style="margin-top: 16px">
+  <app-data-table
+    [columnas]="columnas"
+    [filas]="usuarios()"
+    [cargando]="cargando()"
+    [acciones]="acciones"
+    mensajeVacio="Todavía no hay usuarios."
+  />
+</div>
+
+<ng-template #acciones let-usuario>
+  <button type="button" class="btn btn--pequeno" (click)="editar(usuario)">Editar</button>
+  <button type="button" class="btn btn--pequeno btn--peligro" (click)="eliminar(usuario)">Eliminar</button>
+</ng-template>

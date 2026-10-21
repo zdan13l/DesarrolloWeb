@@ -1,0 +1,66 @@
+<header class="page-header">
+  <h1>Ubicaciones</h1>
+  <button type="button" class="btn btn--primario" (click)="nueva()">Nueva ubicación</button>
+</header>
+
+@if (editando() !== null) {
+  <form class="card" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+    <h2 style="margin-top: 0; font-size: 1.0625rem">
+      {{ editando() === 'nueva' ? 'Nueva ubicación' : 'Editar ubicación' }}
+    </h2>
+    <div class="form-grid">
+      <div class="form-field" [class.form-field--error]="invalido('nombre')">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" formControlName="nombre" maxlength="255" [attr.aria-invalid]="invalido('nombre')" />
+        @if (invalido('nombre')) {
+          <p class="form-error">El nombre es obligatorio.</p>
+        }
+      </div>
+      <div class="form-field" [class.form-field--error]="invalido('edificio')">
+        <label for="edificio">Edificio</label>
+        <input
+          id="edificio"
+          type="text"
+          formControlName="edificio"
+          maxlength="255"
+          [attr.aria-invalid]="invalido('edificio')"
+        />
+        @if (invalido('edificio')) {
+          <p class="form-error">El edificio es obligatorio.</p>
+        }
+      </div>
+      <div class="form-field" [class.form-field--error]="invalido('piso')">
+        <label for="piso">Piso</label>
+        <input id="piso" type="number" min="0" step="1" formControlName="piso" [attr.aria-invalid]="invalido('piso')" />
+        @if (invalido('piso')) {
+          <p class="form-error">Indica el piso (0 o mayor).</p>
+        }
+      </div>
+      <div class="form-field">
+        <label for="detalle">Detalle (opcional)</label>
+        <input id="detalle" type="text" formControlName="detalle" maxlength="255" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="cerrarFormulario()">Cancelar</button>
+      <button type="submit" class="btn btn--primario" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+}
+
+<div style="margin-top: 16px">
+  <app-data-table
+    [columnas]="columnas"
+    [filas]="ubicaciones()"
+    [cargando]="cargando()"
+    [acciones]="acciones"
+    mensajeVacio="Todavía no hay ubicaciones."
+  />
+</div>
+
+<ng-template #acciones let-ubicacion>
+  <button type="button" class="btn btn--pequeno" (click)="editar(ubicacion)">Editar</button>
+  <button type="button" class="btn btn--pequeno btn--peligro" (click)="eliminar(ubicacion)">Eliminar</button>
+</ng-template>

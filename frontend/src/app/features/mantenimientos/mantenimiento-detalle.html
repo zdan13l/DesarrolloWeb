@@ -1,0 +1,137 @@
+<header class="page-header">
+  <h1>Seguimiento del mantenimiento</h1>
+  <a class="btn" routerLink="/mantenimientos">Volver a mantenimientos</a>
+</header>
+
+@if (seguimiento(); as s) {
+  <section class="card">
+    <dl class="datos">
+      <div>
+        <dt>Recurso</dt>
+        <dd>{{ s.mantenimiento.recursoNombre }}</dd>
+      </div>
+      <div>
+        <dt>Estado del recurso</dt>
+        <dd><app-status-badge [estado]="s.recurso.estadoOperativo" /></dd>
+      </div>
+      <div>
+        <dt>Mantenimiento</dt>
+        <dd><app-status-badge [estado]="s.mantenimiento.estadoMantenimiento" /></dd>
+      </div>
+      <div>
+        <dt>Apertura</dt>
+        <dd>{{ s.mantenimiento.fechaApertura | date: 'dd/MM/yyyy HH:mm' }}</dd>
+      </div>
+      <div>
+        <dt>Cierre</dt>
+        <dd>
+          @if (s.mantenimiento.fechaCierre) {
+            {{ s.mantenimiento.fechaCierre | date: 'dd/MM/yyyy HH:mm' }}
+          } @else {
+            —
+          }
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  @if (abierto()) {
+    <form class="card" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+      <h2 class="titulo-seccion">Diagnóstico y observaciones</h2>
+      <div class="form-field" [class.form-field--error]="invalido('diagnostico')">
+        <label for="diagnostico">Diagnóstico</label>
+        <textarea
+          id="diagnostico"
+          formControlName="diagnostico"
+          maxlength="255"
+          rows="3"
+          [attr.aria-invalid]="invalido('diagnostico')"
+        ></textarea>
+        @if (invalido('diagnostico')) {
+          <p class="form-error">El diagnóstico es obligatorio (máximo 255 caracteres).</p>
+        }
+      </div>
+      <div class="form-field separado" [class.form-field--error]="invalido('observaciones')">
+        <label for="observaciones">Observaciones</label>
+        <textarea
+          id="observaciones"
+          formControlName="observaciones"
+          maxlength="255"
+          rows="3"
+          [attr.aria-invalid]="invalido('observaciones')"
+        ></textarea>
+        @if (invalido('observaciones')) {
+          <p class="form-error">Las observaciones son obligatorias (máximo 255 caracteres).</p>
+        }
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn" [disabled]="ocupado() || formulario.pristine">Guardar cambios</button>
+      </div>
+    </form>
+
+    <section class="card">
+      <h2 class="titulo-seccion">Avance</h2>
+      <div class="acciones">
+        @if (s.mantenimiento.estadoMantenimiento === 'ABIERTA') {
+          <button type="button" class="btn" [disabled]="ocupado()" (click)="pasarAEnProceso()">
+            Pasar a «En proceso»
+          </button>
+        }
+        <button
+          type="button"
+          class="btn btn--primario"
+          [disabled]="ocupado()"
+          [attr.aria-expanded]="finalizando()"
+          (click)="finalizando.set(!finalizando())"
+        >
+          Finalizar…
+        </button>
+        <button type="button" class="btn btn--peligro" [disabled]="ocupado()" (click)="cancelar()">
+          Cancelar mantenimiento
+        </button>
+      </div>
+
+      @if (finalizando()) {
+        <div class="panel-finalizar">
+          <label class="casilla">
+            <input type="checkbox" [formControl]="habilitarAlFinalizar" />
+            <span>Dejar el recurso <strong>DISPONIBLE</strong> al finalizar</span>
+          </label>
+          <p class="texto-suave">
+            Si no lo marcas, el recurso seguirá BLOQUEADO y podrás habilitarlo después desde esta pantalla.
+          </p>
+          <div class="form-actions">
+            <button type="button" class="btn" [disabled]="ocupado()" (click)="finalizando.set(false)">Volver</button>
+            <button type="button" class="btn btn--primario" [disabled]="ocupado()" (click)="finalizar()">
+              {{ ocupado() ? 'Finalizando…' : 'Finalizar mantenimiento' }}
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+  } @else {
+    <section class="card">
+      <h2 class="titulo-seccion">Diagnóstico y observaciones</h2>
+      <p><strong>Diagnóstico:</strong> {{ s.mantenimiento.diagnostico }}</p>
+      <p><strong>Observaciones:</strong> {{ s.mantenimiento.observaciones }}</p>
+      <div class="alerta alerta--exito" role="status">
+        <p>Este mantenimiento ya está {{ s.mantenimiento.estadoMantenimiento === 'FINALIZADA' ? 'finalizado' : 'cancelado' }} y no admite cambios.</p>
+      </div>
+      @if (puedeHabilitarRecurso()) {
+        <div class="alerta alerta--aviso separado" role="status">
+          <p>El recurso sigue <strong>BLOQUEADO</strong>. Habilítalo cuando esté listo para volver a usarse.</p>
+          <button type="button" class="btn btn--primario" [disabled]="ocupado()" (click)="habilitarRecurso()">
+            Habilitar recurso
+          </button>
+        </div>
+      }
+    </section>
+  }
+} @else if (cargando()) {
+  <p class="texto-suave" role="status">Cargando mantenimiento…</p>
+} @else {
+  <section class="card">
+    <p>No se encontró el mantenimiento solicitado.</p>
+    <a class="btn btn--primario" routerLink="/mantenimientos">Ver mantenimientos</a>
+  </section>
+}

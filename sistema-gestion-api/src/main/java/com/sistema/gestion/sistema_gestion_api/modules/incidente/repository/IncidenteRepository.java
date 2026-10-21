@@ -11,6 +11,8 @@ public interface IncidenteRepository extends JpaRepository<Incidente, Long> {
 
     List<Incidente> findByRecursoId(Long recursoId);
 
+    boolean existsByUsuarioId(Long usuarioId);
+
     List<Incidente> findBySeveridadIncidente(SeveridadIncidente severidadIncidente);
 
     List<Incidente> findByTipoIncidente(TipoIncidente tipoIncidente);

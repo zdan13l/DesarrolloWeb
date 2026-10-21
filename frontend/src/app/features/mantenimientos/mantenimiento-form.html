@@ -1,0 +1,68 @@
+<header class="page-header">
+  <h1>Abrir mantenimiento</h1>
+  <a class="btn" routerLink="/mantenimientos">Volver a mantenimientos</a>
+</header>
+
+<form class="card" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+  <div class="alerta alerta--aviso" role="note">
+    <p>
+      Al abrir el mantenimiento el recurso queda <strong>BLOQUEADO</strong> hasta que lo finalices y decidas habilitarlo.
+      Un recurso prestado debe devolverse antes.
+    </p>
+  </div>
+
+  <div class="form-field" [class.form-field--error]="invalido('recursoId')" style="margin-top: 16px">
+    <label for="recurso">Recurso</label>
+    <select id="recurso" formControlName="recursoId" [attr.aria-invalid]="invalido('recursoId')">
+      <option [ngValue]="null" disabled>Selecciona un recurso</option>
+      @for (recurso of recursos(); track recurso.id) {
+        <option [ngValue]="recurso.id" [disabled]="recurso.estadoOperativo === 'PRESTADO'">
+          {{ recurso.nombre }}
+          @if (recurso.estadoOperativo === 'PRESTADO') {
+            (prestado: no se puede abrir)
+          } @else if (recurso.estadoOperativo === 'BLOQUEADO') {
+            (ya bloqueado)
+          }
+        </option>
+      }
+    </select>
+    @if (invalido('recursoId')) {
+      <p class="form-error">Elige el recurso que entra a mantenimiento.</p>
+    }
+  </div>
+
+  <div class="form-field" [class.form-field--error]="invalido('diagnostico')" style="margin-top: 16px">
+    <label for="diagnostico">Diagnóstico</label>
+    <textarea
+      id="diagnostico"
+      formControlName="diagnostico"
+      maxlength="255"
+      rows="3"
+      [attr.aria-invalid]="invalido('diagnostico')"
+    ></textarea>
+    @if (invalido('diagnostico')) {
+      <p class="form-error">Describe el diagnóstico (máximo 255 caracteres).</p>
+    }
+  </div>
+
+  <div class="form-field" [class.form-field--error]="invalido('observaciones')" style="margin-top: 16px">
+    <label for="observaciones">Observaciones</label>
+    <textarea
+      id="observaciones"
+      formControlName="observaciones"
+      maxlength="255"
+      rows="3"
+      [attr.aria-invalid]="invalido('observaciones')"
+    ></textarea>
+    @if (invalido('observaciones')) {
+      <p class="form-error">Escribe las observaciones (máximo 255 caracteres).</p>
+    }
+  </div>
+
+  <div class="form-actions">
+    <a class="btn" routerLink="/mantenimientos">Cancelar</a>
+    <button type="submit" class="btn btn--primario" [disabled]="enviando()">
+      {{ enviando() ? 'Abriendo…' : 'Abrir mantenimiento' }}
+    </button>
+  </div>
+</form>

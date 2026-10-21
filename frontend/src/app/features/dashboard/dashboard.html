@@ -1,0 +1,67 @@
+<header class="page-header">
+  <h1>Tablero</h1>
+  <button type="button" class="btn" [disabled]="vista().tipo === 'cargando'" (click)="recargar()">
+    {{ vista().tipo === 'cargando' ? 'Actualizando…' : 'Actualizar' }}
+  </button>
+</header>
+
+@switch (vista().tipo) {
+  @case ('error') {
+    <div class="alerta alerta--error" role="alert">
+      <p>No se pudieron cargar los indicadores.</p>
+      <button type="button" class="btn btn--pequeno" (click)="recargar()">Reintentar</button>
+    </div>
+  }
+  @case ('cargando') {
+    @if (!datos()) {
+      <p class="texto-suave" role="status">Cargando indicadores…</p>
+    }
+  }
+}
+
+@if (datos(); as d) {
+  <section class="fichas" aria-label="Resumen del estado de los recursos">
+    @for (ficha of fichas; track ficha.estado) {
+      <button
+        type="button"
+        class="ficha ficha--boton"
+        [class.ficha--activa]="filtro() === ficha.estado"
+        [attr.aria-pressed]="filtro() === ficha.estado"
+        (click)="alternarFiltro(ficha.estado)"
+      >
+        <span class="ficha__marca ficha__marca--{{ ficha.tono }}" aria-hidden="true">{{ ficha.icono }}</span>
+        <span class="ficha__valor">{{ d.resumen.recursosPorEstado[ficha.estado] ?? 0 }}</span>
+        <span class="ficha__etiqueta">{{ ficha.etiqueta }}</span>
+      </button>
+    }
+    <div class="ficha">
+      <span class="ficha__valor">{{ d.resumen.devolucionesTardias }}</span>
+      <span class="ficha__etiqueta">Devoluciones tardías</span>
+    </div>
+    <div class="ficha">
+      <span class="ficha__valor">{{ d.resumen.incidentesRegistrados }}</span>
+      <span class="ficha__etiqueta">Incidentes registrados</span>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="seccion__cabecera">
+      <h2>Estado actual de los recursos</h2>
+      @if (filtro()) {
+        <button type="button" class="btn btn--pequeno" (click)="filtro.set(null)">
+          Quitar filtro: {{ etiquetaFiltro() }}
+        </button>
+      }
+    </div>
+    <app-data-table
+      [columnas]="columnas"
+      [filas]="filasVisibles()"
+      [mensajeVacio]="filtro() ? 'Ningún recurso está en este estado.' : 'No hay recursos registrados.'"
+    />
+  </section>
+
+  <div class="graficos">
+    <app-barras-conteo titulo="Reservas por recurso" [datos]="d.porRecurso" />
+    <app-barras-conteo titulo="Reservas por categoría" [datos]="d.porCategoria" />
+  </div>
+}

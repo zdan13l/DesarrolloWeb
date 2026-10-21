@@ -1,5 +1,6 @@
 package com.sistema.gestion.sistema_gestion_api.modules.usuario.service;
 
+import com.sistema.gestion.sistema_gestion_api.modules.usuario.dto.RolResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.dto.UsuarioRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.dto.UsuarioResponseDTO;
 
@@ -12,6 +13,8 @@ public interface UsuarioService {
     UsuarioResponseDTO obtenerPorId(Long id);
 
     List<UsuarioResponseDTO> listarActivos();
+
+    List<RolResponseDTO> listarRoles();
 
     UsuarioResponseDTO crear(UsuarioRequestDTO dto);
 

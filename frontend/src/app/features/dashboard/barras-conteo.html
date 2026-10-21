@@ -1,0 +1,26 @@
+<section class="card grafico">
+  <header class="grafico__cabecera">
+    <h2 class="grafico__titulo">{{ titulo() }}</h2>
+    <button type="button" class="btn btn--pequeno" [attr.aria-pressed]="verTabla()" (click)="alternarVista()">
+      {{ verTabla() ? 'Ver gráfico' : 'Ver como tabla' }}
+    </button>
+  </header>
+
+  @if (datos().length === 0) {
+    <p class="texto-suave">Todavía no hay datos para mostrar.</p>
+  } @else if (verTabla()) {
+    <app-data-table [columnas]="columnas" [filas]="datos()" />
+  } @else {
+    <ul class="barras" [attr.aria-label]="titulo()">
+      @for (dato of datos(); track dato.id) {
+        <li class="barras__fila" tabindex="0" [attr.title]="descripcion(dato)" [attr.aria-label]="descripcion(dato)">
+          <span class="barras__nombre">{{ dato.nombre }}</span>
+          <span class="barras__pista" aria-hidden="true">
+            <span class="barras__barra" [style.width.%]="ancho(dato)"></span>
+          </span>
+          <span class="barras__valor" aria-hidden="true">{{ dato.totalReservas }}</span>
+        </li>
+      }
+    </ul>
+  }
+</section>

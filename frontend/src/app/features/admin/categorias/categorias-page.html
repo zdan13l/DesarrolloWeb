@@ -1,0 +1,46 @@
+<header class="page-header">
+  <h1>Categorías</h1>
+  <button type="button" class="btn btn--primario" (click)="nueva()">Nueva categoría</button>
+</header>
+
+@if (editando() !== null) {
+  <form class="card" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+    <h2 style="margin-top: 0; font-size: 1.0625rem">
+      {{ editando() === 'nueva' ? 'Nueva categoría' : 'Editar categoría' }}
+    </h2>
+    <div class="form-grid">
+      <div class="form-field" [class.form-field--error]="invalido('nombre')">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" formControlName="nombre" maxlength="255" [attr.aria-invalid]="invalido('nombre')" />
+        @if (invalido('nombre')) {
+          <p class="form-error">El nombre es obligatorio.</p>
+        }
+      </div>
+      <div class="form-field" [class.form-field--error]="invalido('descripcion')">
+        <label for="descripcion">Descripción (opcional)</label>
+        <input id="descripcion" type="text" formControlName="descripcion" maxlength="255" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="cerrarFormulario()">Cancelar</button>
+      <button type="submit" class="btn btn--primario" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+}
+
+<div style="margin-top: 16px">
+  <app-data-table
+    [columnas]="columnas"
+    [filas]="categorias()"
+    [cargando]="cargando()"
+    [acciones]="acciones"
+    mensajeVacio="Todavía no hay categorías."
+  />
+</div>
+
+<ng-template #acciones let-categoria>
+  <button type="button" class="btn btn--pequeno" (click)="editar(categoria)">Editar</button>
+  <button type="button" class="btn btn--pequeno btn--peligro" (click)="eliminar(categoria)">Eliminar</button>
+</ng-template>

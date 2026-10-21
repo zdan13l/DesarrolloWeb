@@ -1,0 +1,27 @@
+<header class="page-header">
+  <h1>Mantenimientos</h1>
+  <a class="btn btn--primario" routerLink="/mantenimientos/nuevo">Abrir mantenimiento</a>
+</header>
+
+<section class="card filtros">
+  <div class="form-field">
+    <label for="filtro-estado">Mostrar</label>
+    <select id="filtro-estado" [ngModel]="filtro()" (ngModelChange)="filtro.set($event)">
+      @for (opcion of opcionesFiltro; track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+      }
+    </select>
+  </div>
+</section>
+
+<app-data-table
+  [columnas]="columnas"
+  [filas]="filas()"
+  [cargando]="cargando()"
+  [acciones]="acciones"
+  mensajeVacio="No hay mantenimientos en esta vista."
+/>
+
+<ng-template #acciones let-mantenimiento>
+  <a class="btn btn--pequeno" [routerLink]="['/mantenimientos', mantenimiento.id]">Ver seguimiento</a>
+</ng-template>

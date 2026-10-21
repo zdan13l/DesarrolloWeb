@@ -1,0 +1,137 @@
+/*
+ * Colores de visualización del tablero. La serie de los gráficos es un solo azul; los estados usan
+ * la paleta de estado fija (bueno, aviso, crítico) siempre acompañada de icono y etiqueta.
+ */
+:host {
+  display: block;
+  --viz-serie: #2a78d6;
+  --viz-base: #c3c2b7;
+  --viz-bueno: #0ca30c;
+  --viz-info: #2a78d6;
+  --viz-aviso: #fab219;
+  --viz-critico: #d03b3b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --viz-serie: #3987e5;
+    --viz-base: #383835;
+    --viz-info: #3987e5;
+  }
+}
+
+.fichas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.ficha {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.ficha--boton {
+  cursor: pointer;
+}
+
+.ficha--boton:hover {
+  border-color: var(--primary);
+}
+
+.ficha--activa {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.ficha__marca {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.ficha__marca--bueno {
+  background: var(--viz-bueno);
+}
+
+.ficha__marca--info {
+  background: var(--viz-info);
+}
+
+.ficha__marca--aviso {
+  background: var(--viz-aviso);
+  color: #0b0b0b;
+}
+
+.ficha__marca--critico {
+  background: var(--viz-critico);
+}
+
+/* Cifras grandes con números proporcionales (no tabulares). */
+.ficha__valor {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.ficha__etiqueta {
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.seccion {
+  margin-bottom: 28px;
+}
+
+.seccion__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.seccion__cabecera h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 16px;
+}
+
+.graficos .card + .card {
+  margin-top: 0;
+}
+
+.alerta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.alerta p {
+  margin: 0;
+}

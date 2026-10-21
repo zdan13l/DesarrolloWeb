@@ -4,6 +4,7 @@ import com.sistema.gestion.sistema_gestion_api.modules.mantenimiento.model.Estad
 import com.sistema.gestion.sistema_gestion_api.modules.mantenimiento.model.Mantenimiento;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface MantenimientoRepository extends JpaRepository<Mantenimiento, Long> {
@@ -11,4 +12,6 @@ public interface MantenimientoRepository extends JpaRepository<Mantenimiento, Lo
     List<Mantenimiento> findByRecursoId(Long recursoId);
 
     List<Mantenimiento> findByEstadoMantenimiento(EstadoMantenimiento estadoMantenimiento);
+
+    boolean existsByRecursoIdAndEstadoMantenimientoIn(Long recursoId, Collection<EstadoMantenimiento> estados);
 }

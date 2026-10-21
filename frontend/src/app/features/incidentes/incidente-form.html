@@ -1,0 +1,118 @@
+<header class="page-header">
+  <h1>Reportar incidente</h1>
+  <a class="btn" routerLink="/incidentes">Volver a incidentes</a>
+</header>
+
+@if (reportado(); as incidente) {
+  <section class="card" aria-live="polite">
+    <div class="alerta alerta--exito" role="status">
+      <p><strong>Incidente reportado.</strong> Quedó registrado sobre «{{ incidente.recursoNombre }}».</p>
+    </div>
+    @if (incidente.recursoBloqueado) {
+      <div class="alerta alerta--aviso" role="status">
+        <p>
+          <strong>El recurso quedó BLOQUEADO</strong> por tratarse de un incidente crítico. No podrá reservarse ni
+          prestarse hasta que un gestor lo habilite tras el mantenimiento.
+        </p>
+      </div>
+    }
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="reportarOtro()">Reportar otro</button>
+      <a class="btn btn--primario" routerLink="/incidentes">Ver incidentes</a>
+    </div>
+  </section>
+} @else {
+  <form class="card" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+    <div class="form-grid">
+      <div class="form-field" [class.form-field--error]="invalido('recursoId')">
+        <label for="recurso">Recurso</label>
+        <select id="recurso" formControlName="recursoId" [attr.aria-invalid]="invalido('recursoId')">
+          <option [ngValue]="null" disabled>Selecciona un recurso</option>
+          @for (recurso of recursos(); track recurso.id) {
+            <option [ngValue]="recurso.id">{{ recurso.nombre }}</option>
+          }
+        </select>
+        @if (invalido('recursoId')) {
+          <p class="form-error">Elige el recurso afectado.</p>
+        }
+      </div>
+
+      <div class="form-field" [class.form-field--error]="invalido('usuarioId')">
+        <label for="usuario">Quién reporta</label>
+        <select id="usuario" formControlName="usuarioId" [attr.aria-invalid]="invalido('usuarioId')">
+          <option [ngValue]="null" disabled>Selecciona un usuario</option>
+          @for (usuario of usuarios(); track usuario.id) {
+            <option [ngValue]="usuario.id">{{ usuario.nombre }} {{ usuario.apellido }}</option>
+          }
+        </select>
+        @if (invalido('usuarioId')) {
+          <p class="form-error">Elige quién reporta el incidente.</p>
+        }
+      </div>
+
+      <div class="form-field" [class.form-field--error]="invalido('tipoIncidente')">
+        <label for="tipo">Tipo de incidente</label>
+        <select id="tipo" formControlName="tipoIncidente" [attr.aria-invalid]="invalido('tipoIncidente')">
+          <option value="" disabled>Selecciona el tipo</option>
+          @for (tipo of tipos; track tipo.valor) {
+            <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
+          }
+        </select>
+        @if (invalido('tipoIncidente')) {
+          <p class="form-error">Elige el tipo de incidente.</p>
+        }
+      </div>
+
+      <div class="form-field" [class.form-field--error]="invalido('severidadIncidente')">
+        <label for="severidad">Severidad</label>
+        <select id="severidad" formControlName="severidadIncidente" [attr.aria-invalid]="invalido('severidadIncidente')">
+          <option value="" disabled>Selecciona la severidad</option>
+          @for (severidad of severidades; track severidad.valor) {
+            <option [value]="severidad.valor">{{ severidad.etiqueta }}</option>
+          }
+        </select>
+        @if (invalido('severidadIncidente')) {
+          <p class="form-error">Elige la severidad.</p>
+        }
+      </div>
+
+      <div class="form-field" [class.form-field--error]="invalido('fecha')">
+        <label for="fecha">Fecha y hora del incidente</label>
+        <input id="fecha" type="datetime-local" formControlName="fecha" [attr.aria-invalid]="invalido('fecha')" />
+        @if (invalido('fecha')) {
+          <p class="form-error">Indica cuándo ocurrió.</p>
+        }
+      </div>
+    </div>
+
+    <div class="form-field" [class.form-field--error]="invalido('descripcion')" style="margin-top: 16px">
+      <label for="descripcion">Descripción</label>
+      <textarea
+        id="descripcion"
+        formControlName="descripcion"
+        maxlength="255"
+        rows="4"
+        [attr.aria-invalid]="invalido('descripcion')"
+      ></textarea>
+      @if (invalido('descripcion')) {
+        <p class="form-error">Describe lo ocurrido (máximo 255 caracteres).</p>
+      }
+    </div>
+
+    @if (bloqueara()) {
+      <div class="alerta alerta--aviso" role="status" style="margin-top: 16px">
+        <p>
+          Un incidente <strong>crítico bloquea el recurso</strong> en cuanto se guarda: no podrá reservarse ni
+          prestarse hasta que se habilite.
+        </p>
+      </div>
+    }
+
+    <div class="form-actions">
+      <a class="btn" routerLink="/incidentes">Cancelar</a>
+      <button type="submit" class="btn btn--primario" [disabled]="enviando()">
+        {{ enviando() ? 'Reportando…' : 'Reportar incidente' }}
+      </button>
+    </div>
+  </form>
+}

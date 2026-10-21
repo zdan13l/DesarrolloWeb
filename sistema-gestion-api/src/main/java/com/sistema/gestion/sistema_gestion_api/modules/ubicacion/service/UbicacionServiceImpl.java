@@ -1,5 +1,6 @@
 package com.sistema.gestion.sistema_gestion_api.modules.ubicacion.service;
 
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.repository.RecursoRepository;
 import com.sistema.gestion.sistema_gestion_api.modules.ubicacion.dto.UbicacionRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.ubicacion.dto.UbicacionResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.ubicacion.model.Ubicacion;
@@ -14,9 +15,11 @@ import java.util.List;
 public class UbicacionServiceImpl implements UbicacionService {
 
     private final UbicacionRepository ubicacionRepository;
+    private final RecursoRepository recursoRepository;
 
-    public UbicacionServiceImpl(UbicacionRepository ubicacionRepository) {
+    public UbicacionServiceImpl(UbicacionRepository ubicacionRepository, RecursoRepository recursoRepository) {
         this.ubicacionRepository = ubicacionRepository;
+        this.recursoRepository = recursoRepository;
     }
 
     @Override
@@ -62,6 +65,10 @@ public class UbicacionServiceImpl implements UbicacionService {
     public void eliminar(Long id) {
         if (!ubicacionRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ubicacion no encontrada: " + id);
+        }
+        if (!recursoRepository.findByUbicacionId(id).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "No se puede eliminar la ubicación porque tiene recursos asociados.");
         }
         ubicacionRepository.deleteById(id);
     }

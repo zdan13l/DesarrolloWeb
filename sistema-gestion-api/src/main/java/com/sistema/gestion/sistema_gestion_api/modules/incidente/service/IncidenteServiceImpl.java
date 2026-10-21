@@ -12,6 +12,7 @@ import com.sistema.gestion.sistema_gestion_api.modules.usuario.model.Usuario;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -50,32 +51,39 @@ public class IncidenteServiceImpl implements IncidenteService {
                 .toList();
     }
 
+    /** RN-04: un incidente CRITICA bloquea el recurso en la misma transacción en que se guarda. */
     @Override
+    @Transactional
     public IncidenteResponseDTO crear(IncidenteRequestDTO dto) {
         Incidente incidente = new Incidente();
         aplicarDatos(incidente, dto);
-
-        Recurso recurso = incidente.getRecurso();
-        boolean bloqueadoPorCritico = false;
-
-        if (dto.severidadIncidente() == SeveridadIncidente.CRITICA) {
-            recurso.setEstadoOperativo(EstadoOperativo.BLOQUEADO);
-            recursoRepository.save(recurso);
-            bloqueadoPorCritico = true;
-        }
-
-        incidente.setRecursoBloqueado(bloqueadoPorCritico);
+        incidente.setRecursoBloqueado(bloquearSiEsCritico(incidente));
         return toResponse(incidenteRepository.save(incidente));
     }
 
     @Override
+    @Transactional
     public IncidenteResponseDTO actualizar(Long id, IncidenteRequestDTO dto) {
         Incidente incidente = buscarEntidad(id);
         aplicarDatos(incidente, dto);
+        // Si el reporte pasa a CRITICA se bloquea; si ya había bloqueado el recurso, el indicador se conserva.
+        boolean bloqueaAhora = bloquearSiEsCritico(incidente);
+        incidente.setRecursoBloqueado(bloqueaAhora || Boolean.TRUE.equals(incidente.getRecursoBloqueado()));
         return toResponse(incidenteRepository.save(incidente));
     }
 
+    private boolean bloquearSiEsCritico(Incidente incidente) {
+        if (incidente.getSeveridadIncidente() != SeveridadIncidente.CRITICA) {
+            return false;
+        }
+        Recurso recurso = incidente.getRecurso();
+        recurso.setEstadoOperativo(EstadoOperativo.BLOQUEADO);
+        recursoRepository.save(recurso);
+        return true;
+    }
+
     @Override
+    @Transactional
     public void eliminar(Long id) {
         if (!incidenteRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Incidente no encontrado: " + id);

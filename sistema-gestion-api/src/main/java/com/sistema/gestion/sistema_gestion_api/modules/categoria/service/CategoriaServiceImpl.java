@@ -4,6 +4,7 @@ import com.sistema.gestion.sistema_gestion_api.modules.categoria.dto.CategoriaRe
 import com.sistema.gestion.sistema_gestion_api.modules.categoria.dto.CategoriaResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.categoria.model.Categoria;
 import com.sistema.gestion.sistema_gestion_api.modules.categoria.repository.CategoriaRepository;
+import com.sistema.gestion.sistema_gestion_api.modules.recurso.repository.RecursoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,9 +15,11 @@ import java.util.List;
 public class CategoriaServiceImpl implements CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
+    private final RecursoRepository recursoRepository;
 
-    public CategoriaServiceImpl(CategoriaRepository categoriaRepository) {
+    public CategoriaServiceImpl(CategoriaRepository categoriaRepository, RecursoRepository recursoRepository) {
         this.categoriaRepository = categoriaRepository;
+        this.recursoRepository = recursoRepository;
     }
 
     @Override
@@ -58,6 +61,10 @@ public class CategoriaServiceImpl implements CategoriaService {
     public void eliminar(Long id) {
         if (!categoriaRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria no encontrada: " + id);
+        }
+        if (!recursoRepository.findByCategoriaId(id).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "No se puede eliminar la categoría porque tiene recursos asociados.");
         }
         categoriaRepository.deleteById(id);
     }

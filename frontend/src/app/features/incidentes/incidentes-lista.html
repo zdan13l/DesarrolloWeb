@@ -1,0 +1,23 @@
+<header class="page-header">
+  <h1>Incidentes</h1>
+  <a class="btn btn--primario" routerLink="reportar">Reportar incidente</a>
+</header>
+
+<section class="card filtros">
+  <div class="form-field">
+    <label for="filtro-recurso">Filtrar por recurso</label>
+    <select id="filtro-recurso" [formControl]="filtroRecurso">
+      <option [ngValue]="null">Todos los recursos</option>
+      @for (recurso of recursos(); track recurso.id) {
+        <option [ngValue]="recurso.id">{{ recurso.nombre }}</option>
+      }
+    </select>
+  </div>
+</section>
+
+<app-data-table
+  [columnas]="columnas"
+  [filas]="incidentes()"
+  [cargando]="cargando()"
+  mensajeVacio="No hay incidentes registrados."
+/>
