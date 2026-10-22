@@ -1,0 +1,129 @@
+    {
+    "info": {
+        "name": "PontiReservas - Flujo End-to-End",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+        "key": "baseUrl",
+        "value": "http://localhost:8080/api"
+        }
+    ],
+    "item": [
+        {
+        "name": "1. Crear Reserva Exitosa",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+            "mode": "raw",
+            "raw": "{\n  \"recursoId\": 1,\n  \"usuarioId\": 1,\n  \"fechaHoraInicio\": \"2026-11-01T08:00:00Z\",\n  \"fechaHoraFin\": \"2026-11-01T10:00:00Z\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('Reserva creada con exito (201)', function () {",
+                "    pm.response.to.have.status(201);",
+                "});"
+                ]
+            }
+            }
+        ]
+        },
+        {
+        "name": "2. Validar Solapamiento Horario",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+            "mode": "raw",
+            "raw": "{\n  \"recursoId\": 1,\n  \"usuarioId\": 2,\n  \"fechaHoraInicio\": \"2026-11-01T09:00:00Z\",\n  \"fechaHoraFin\": \"2026-11-01T11:00:00Z\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('Detecta conflicto de solapamiento (409)', function () {",
+                "    pm.response.to.have.status(409);",
+                "});"
+                ]
+            }
+            }
+        ]
+        },
+        {
+        "name": "3. Reportar Incidente Crítico",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+            "mode": "raw",
+            "raw": "{\n  \"recursoId\": 2,\n  \"usuarioId\": 1,\n  \"tipoIncidente\": \"DANO_FISICO\",\n  \"severidadIncidente\": \"CRITICA\",\n  \"descripcion\": \"Se rompio la pantalla del equipo\",\n  \"fecha\": \"2026-10-12T15:30:00Z\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/incidentes", "host": ["{{baseUrl}}"], "path": ["incidentes"] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('Incidente critico registrado y recurso bloqueado (201)', function () {",
+                "    pm.response.to.have.status(201);",
+                "});"
+                ]
+            }
+            }
+        ]
+        },
+        {
+        "name": "4. Validar Recurso Bloqueado",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+            "mode": "raw",
+            "raw": "{\n  \"recursoId\": 2,\n  \"usuarioId\": 1,\n  \"fechaHoraInicio\": \"2026-11-02T08:00:00Z\",\n  \"fechaHoraFin\": \"2026-11-02T10:00:00Z\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('Rechaza reserva por recurso bloqueado (409)', function () {",
+                "    pm.response.to.have.status(409);",
+                "});"
+                ]
+            }
+            }
+        ]
+        },
+        {
+        "name": "5. Finalizar Mantenimiento y Habilitar",
+        "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/mantenimientos/1/finalizar?habilitarRecurso=true", "host": ["{{baseUrl}}"], "path": ["mantenimientos", "1", "finalizar"], "query": [{ "key": "habilitarRecurso", "value": "true" }] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('Mantenimiento finalizado y recurso habilitado (200)', function () {",
+                "    pm.response.to.have.status(200);",
+                "});"
+                ]
+            }
+            }
+        ]
+        }
+    ]
+    }
