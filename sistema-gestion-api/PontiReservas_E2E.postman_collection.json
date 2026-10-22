@@ -28,6 +28,7 @@
                 "exec": [
                 "pm.test('Reserva creada con exito (201)', function () {",
                 "    pm.response.to.have.status(201);",
+                "    pm.collectionVariables.set('reservaId', pm.response.json().id);",
                 "});"
                 ]
             }
@@ -52,6 +53,90 @@
                 "exec": [
                 "pm.test('Detecta conflicto de solapamiento (409)', function () {",
                 "    pm.response.to.have.status(409);",
+                "});"
+                ]
+            }
+            }
+        ]
+        },
+        {
+        "name": "2.1 Cancelar Reserva",
+        "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/reservas/1/cancelar", "host": ["{{baseUrl}}"], "path": ["reservas", "{{reservaId}}", "cancelar"] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('Reserva cancelada (200)', function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "pm.test('Estado de la reserva es CANCELADA', function () {",
+                "    pm.expect(pm.response.json().estadoReserva).to.eql('CANCELADA');",
+                "});"
+                ]
+            }
+            }
+        ]
+        },
+        {
+        "name": "2.2 Cancelar Reserva Ya Cancelada",
+        "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/reservas/1/cancelar", "host": ["{{baseUrl}}"], "path": ["reservas", "{{reservaId}}", "cancelar"] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('Rechaza cancelar una reserva no confirmada (409)', function () {",
+                "    pm.response.to.have.status(409);",
+                "});"
+                ]
+            }
+            }
+        ]
+        },
+        {
+        "name": "2.3 Cancelar Reserva Inexistente",
+        "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/reservas/999999/cancelar", "host": ["{{baseUrl}}"], "path": ["reservas", "999999", "cancelar"] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('Reserva inexistente (404)', function () {",
+                "    pm.response.to.have.status(404);",
+                "});"
+                ]
+            }
+            }
+        ]
+        },
+        {
+        "name": "2.4 Franja Liberada Tras Cancelar",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+            "mode": "raw",
+            "raw": "{\n  \"recursoId\": 1,\n  \"usuarioId\": 2,\n  \"fechaHoraInicio\": \"2026-11-01T09:00:00Z\",\n  \"fechaHoraFin\": \"2026-11-01T11:00:00Z\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+        },
+        "event": [
+            {
+            "listen": "test",
+            "script": {
+                "exec": [
+                "pm.test('La franja cancelada vuelve a estar libre (201)', function () {",
+                "    pm.response.to.have.status(201);",
                 "});"
                 ]
             }

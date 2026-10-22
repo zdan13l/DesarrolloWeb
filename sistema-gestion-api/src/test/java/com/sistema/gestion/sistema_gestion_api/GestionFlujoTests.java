@@ -234,6 +234,48 @@
                         .andExpect(jsonPath("$.errors[?(@.campo=='correo')]").exists());
         }
 
+        @Test
+        void cancelarUnaReservaConfirmadaLaPasaACanceladaYLiberaLaFranja() throws Exception {
+                long recurso = crearRecurso("DISPONIBLE");
+                long reserva = idDe(mvc.perform(json(post("/api/reservas"), reserva(recurso, 24, 26)))
+                        .andExpect(status().isCreated()));
+
+                mvc.perform(patch("/api/reservas/" + reserva + "/cancelar"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.estadoReserva").value("CANCELADA"));
+
+                // La franja queda libre: se puede reservar de nuevo el mismo horario.
+                mvc.perform(json(post("/api/reservas"), reserva(recurso, 24, 26)))
+                        .andExpect(status().isCreated());
+        }
+
+        @Test
+        void noSePuedeCancelarDosVecesUnaReserva() throws Exception {
+                long recurso = crearRecurso("DISPONIBLE");
+                long reserva = idDe(mvc.perform(json(post("/api/reservas"), reserva(recurso, 24, 26)))
+                        .andExpect(status().isCreated()));
+
+                mvc.perform(patch("/api/reservas/" + reserva + "/cancelar")).andExpect(status().isOk());
+                mvc.perform(patch("/api/reservas/" + reserva + "/cancelar"))
+                        .andExpect(status().isConflict())
+                        .andExpect(jsonPath("$.status").value(409));
+        }
+
+        @Test
+        void cancelarUnaReservaInexistenteResponde404() throws Exception {
+                mvc.perform(patch("/api/reservas/999999/cancelar"))
+                        .andExpect(status().isNotFound())
+                        .andExpect(jsonPath("$.status").value(404));
+        }
+
+        private String reserva(long recursoId, int inicioHoras, int finHoras) {
+                java.time.Instant ahora = java.time.Instant.now();
+                return """
+                        {"fechaHoraInicio":"%s","fechaHoraFin":"%s","recursoId":%d,"usuarioId":%d}
+                        """.formatted(ahora.plus(inicioHoras, java.time.temporal.ChronoUnit.HOURS),
+                        ahora.plus(finHoras, java.time.temporal.ChronoUnit.HOURS), recursoId, USUARIO);
+        }
+
         private long crearRecurso(String estado) throws Exception {
                 String body = """
                         {"nombre":"Recurso de prueba","tipoRecurso":"EQUIPO","descripcion":"d","caracteristicas":"c",
