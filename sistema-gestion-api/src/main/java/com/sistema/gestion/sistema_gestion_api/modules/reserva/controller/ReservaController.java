@@ -82,6 +82,19 @@ public class ReservaController {
         return reservaService.actualizar(id, dto);
     }
 
+    @Operation(summary = "Cancelar reserva",
+        description = "Cancelación lógica: solo reservas CONFIRMADAS que aún no han iniciado; libera la franja horaria")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Reserva cancelada"),
+        @ApiResponse(responseCode = "404", description = "Reserva inexistente"),
+        @ApiResponse(responseCode = "409", description = "La reserva no está CONFIRMADA o ya ha iniciado")
+    })
+    @PatchMapping("/{id}/cancelar")
+    @ResponseStatus(HttpStatus.OK)
+    public ReservaResponseDTO cancelar(@PathVariable Long id) {
+        return reservaService.cancelar(id);
+    }
+
     @Operation(summary = "Eliminar reserva", description = "Eliminación física, uso administrativo")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Reserva eliminada"),
