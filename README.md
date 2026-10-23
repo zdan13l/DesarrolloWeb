@@ -14,8 +14,23 @@ Proyecto de Desarrollo Web — API REST para la gestión de recursos, préstamos
 - **H2 Database** (base de datos en memoria/desarrollo)
 - **Maven** (gestión de dependencias y build)
 - **JUnit / Spring Boot Test** (pruebas)
+- **Spring Boot Actuator** (monitoreo)
+- **springdoc-openapi** (documentación Swagger UI de la API)
+
+### Frontend (SPA)
+
+Aplicación de una sola página (SPA) en `frontend/` que consume la API REST:
+
+- **Angular**
+- **TypeScript**
+- **Angular Router** (navegación del lado del cliente)
+- **Angular CLI / `@angular/build`** (build y servidor de desarrollo)
+- **npm** (gestión de dependencias)
 
 ## Estructura del proyecto
+
+- `sistema-gestion-api/`: backend (API REST)
+- `frontend/`: SPA en Angular
 
 El backend (`sistema-gestion-api`) está organizado en módulos por dominio, cada uno con su propia capa de `controller`, `dto`, `model`, `repository` y `service`:
 
@@ -51,9 +66,15 @@ cd sistema-gestion-api
 ./mvnw test
 ```
 
-## Aplicación multipágina (MPA)
+## Cómo ejecutar la SPA
 
-Además de la API REST, el proyecto ahora incluye una aplicación multipágina (Thymeleaf) que consume esos mismos endpoints: sidebar de navegación por módulo (Recursos, Categorías, Ubicaciones, Reservas, Préstamos, Incidentes) y formularios básicos de CRUD para cada entidad del alcance de esta entrega. Se sirve desde la misma app en `http://localhost:8080/`.
+```bash
+cd frontend
+npm install
+ng serve
+```
+
+La SPA quedará disponible en `http://localhost:4200` (requiere el backend corriendo en el puerto 8080).
 
 ## Diagrama de navegación
 
@@ -72,6 +93,6 @@ Descripción detallada de los casos de uso para la aplicación [`CUs Proyecto We
 ## Diagrama Entidad-Relación
 Diagrama ER con las entidades a persistir en la página web, contando además con los enums utilizados para el desarrollo [`Diagrama ER`](DiagramaER.pdf)
 
-## Video de sustentación
+## Video de sustentación - Entrega 1
 
 https://youtu.be/E-NTiO7pRbI
