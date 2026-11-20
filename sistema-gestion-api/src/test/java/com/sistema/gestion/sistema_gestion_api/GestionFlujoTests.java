@@ -4,6 +4,7 @@
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
         import org.springframework.boot.test.context.SpringBootTest;
+        import org.springframework.context.annotation.Import;
         import org.springframework.http.MediaType;
         import org.springframework.test.web.servlet.MockMvc;
         import org.springframework.test.web.servlet.ResultActions;
@@ -22,6 +23,7 @@
         /** Pruebas de incidentes, mantenimientos y datos maestros sobre H2 en memoria con los datos del DataSeeder. */
         @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:gestion-flujo;DB_CLOSE_DELAY=-1")
         @AutoConfigureMockMvc
+        @Import(AdministradorPorDefecto.class)
         @Transactional
         class GestionFlujoTests {
 
@@ -227,7 +229,7 @@
 
         @Test
         void laValidacionResponde400ConUnElementoPorCampo() throws Exception {
-                mvc.perform(json(post("/api/usuarios"), "{\"nombre\":\"\",\"apellido\":\"X\",\"correo\":\"no-es-correo\",\"activo\":true,\"rolId\":1}"))
+                mvc.perform(json(post("/api/usuarios"), "{\"nombre\":\"\",\"apellido\":\"X\",\"correo\":\"no-es-correo\",\"password\":\"clave12345\",\"activo\":true,\"rolId\":1}"))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.status").value(400))
                         .andExpect(jsonPath("$.errors[?(@.campo=='nombre')]").exists())
@@ -300,7 +302,7 @@
 
         private String usuario(String correo) {
                 return """
-                        {"nombre":"Nuevo","apellido":"Usuario","correo":"%s","activo":true,"rolId":1}
+                        {"nombre":"Nuevo","apellido":"Usuario","correo":"%s","password":"clave12345","activo":true,"rolId":1}
                         """.formatted(correo);
         }
 

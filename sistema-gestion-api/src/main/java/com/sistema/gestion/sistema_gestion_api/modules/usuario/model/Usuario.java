@@ -24,6 +24,9 @@ public class Usuario {
     private String correo;
 
     @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
     private boolean activo = true;
 
     @ManyToOne
@@ -63,6 +66,14 @@ public class Usuario {
 
     public void setCorreo(String correo) {
         this.correo = correo;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public boolean isActivo() {

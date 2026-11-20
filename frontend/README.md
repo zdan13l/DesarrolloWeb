@@ -23,6 +23,7 @@ El backend debe estar corriendo (`./mvnw spring-boot:run` en `sistema-gestion-ap
 src/app/
   app.config.ts, app.routes.ts      ← Base. No se editan.
   core/                             ← Base. No se edita.
+    auth/                            sesión, login, interceptor de token y guards
     interceptors/error.interceptor.ts
     layout/shell/                    barra lateral, barra superior, toasts y diálogo de confirmación
     models/api-error.ts              formato único de error del backend
@@ -52,6 +53,9 @@ Cada carpeta de `features/` ya trae su archivo `*.routes.ts` con las rutas del W
 | Pieza | Uso |
 |---|---|
 | `environment.apiUrl` | URL base de la API: `` `${environment.apiUrl}/reservas` ``. |
+| `AuthService` | Sesión del usuario: `usuario()`, `rol()`, `token()`, `tieneRol('GESTOR', 'ADMINISTRADOR')`, `cerrarSesion()`. |
+| `authInterceptor` | Agrega `Authorization: Bearer` a las peticiones a la API y, ante un 401, cierra la sesión y lleva a `/login`. |
+| `rolGuard(...roles)` | Restringe una ruta por rol: `canActivate: [rolGuard('GESTOR', 'ADMINISTRADOR')]` en el `*.routes.ts` de la feature. Redirige a `/acceso-denegado`. |
 | Interceptor de errores | Toda respuesta de error se muestra como toast con el campo `message` del backend (y un detalle por campo en los 400). El error se relanza, así que puedes reaccionar en `subscribe({ error })`. |
 | `OMITIR_TOAST_ERROR` | Para mostrar el error en tu propia pantalla (p. ej. el 409 del formulario de reservas) y no como toast: `{ context: new HttpContext().set(OMITIR_TOAST_ERROR, true) }`. |
 | `leerErrorApi(err)`, `mensajeDeError(err)` | Leen un error de `HttpClient` en el formato `{ status, message, errors[] }`. |
@@ -93,3 +97,7 @@ export class ReservasLista {
 - Las fechas viajan en ISO-8601 UTC (`Instant`); muéstralas con el pipe `date`, que las pasa a hora local.
 - Reglas de negocio solo en el servidor: la SPA muestra el mensaje que devuelve el backend, no lo reimplementa.
 - Nombres de archivo en minúscula con guion (`reserva.service.ts`, `reservas-lista.ts`); texto de la interfaz en español.
+
+## Autenticación
+
+Todo el layout exige sesión (`autenticadoGuard`). Los usuarios de prueba, el contrato del login y la matriz de permisos están en [PERMISOS.md](../PERMISOS.md). La interfaz solo oculta opciones según el rol; los permisos reales los valida el servidor.

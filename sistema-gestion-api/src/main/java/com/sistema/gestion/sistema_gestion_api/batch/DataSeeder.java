@@ -30,6 +30,7 @@ import com.sistema.gestion.sistema_gestion_api.modules.usuario.repository.Usuari
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -49,6 +50,7 @@ public class DataSeeder implements CommandLineRunner {
     private final PrestamoRepository prestamoRepository;
     private final IncidenteRepository incidenteRepository;
     private final MantenimientoRepository mantenimientoRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DataSeeder(CategoriaRepository categoriaRepository,
                        UbicacionRepository ubicacionRepository,
@@ -58,7 +60,8 @@ public class DataSeeder implements CommandLineRunner {
                        ReservaRepository reservaRepository,
                        PrestamoRepository prestamoRepository,
                        IncidenteRepository incidenteRepository,
-                       MantenimientoRepository mantenimientoRepository) {
+                       MantenimientoRepository mantenimientoRepository,
+                       PasswordEncoder passwordEncoder) {
         this.categoriaRepository = categoriaRepository;
         this.ubicacionRepository = ubicacionRepository;
         this.usuarioRepository = usuarioRepository;
@@ -68,6 +71,7 @@ public class DataSeeder implements CommandLineRunner {
         this.prestamoRepository = prestamoRepository;
         this.incidenteRepository = incidenteRepository;
         this.mantenimientoRepository = mantenimientoRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -89,9 +93,10 @@ public class DataSeeder implements CommandLineRunner {
         Rol rolGestor = rol("Gestor de recursos");
         Rol rolAdministrador = rol("Administrador");
 
-        Usuario docente = usuario("Ana", "Martínez", "ana.martinez@campus.edu", rolSolicitante);
-        Usuario estudiante = usuario("Luis", "Pérez", "luis.perez@campus.edu", rolSolicitante);
-        Usuario gestor = usuario("Camila", "Rojas", "camila.rojas@campus.edu", rolGestor);
+        Usuario docente = usuario("Ana", "Martínez", "ana.martinez@campus.edu", "solicitante123", rolSolicitante);
+        Usuario estudiante = usuario("Luis", "Pérez", "luis.perez@campus.edu", "solicitante123", rolSolicitante);
+        Usuario gestor = usuario("Camila", "Rojas", "camila.rojas@campus.edu", "gestor12345", rolGestor);
+        usuario("Diego", "Ramírez", "diego.ramirez@campus.edu", "admin12345", rolAdministrador);
 
         Recurso aula101 = recurso("Aula 101", TipoRecurso.ESPACIO, "Aula estándar con proyector",
                 "Capacidad 40, tablero, proyector", ModalidadRecurso.RESERVABLE,
@@ -158,11 +163,12 @@ public class DataSeeder implements CommandLineRunner {
         return rolRepository.save(r);
     }
 
-    private Usuario usuario(String nombre, String apellido, String correo, Rol rol) {
+    private Usuario usuario(String nombre, String apellido, String correo, String password, Rol rol) {
         Usuario u = new Usuario();
         u.setNombre(nombre);
         u.setApellido(apellido);
         u.setCorreo(correo);
+        u.setPassword(passwordEncoder.encode(password));
         u.setActivo(true);
         u.setRol(rol);
         return usuarioRepository.save(u);

@@ -18,6 +18,7 @@ CREATE TABLE usuario (
     nombre VARCHAR(255) NOT NULL,
     apellido VARCHAR(255) NOT NULL,
     correo VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
     activo BOOLEAN NOT NULL,
     rol_id BIGINT,
     CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id) REFERENCES rol(id)

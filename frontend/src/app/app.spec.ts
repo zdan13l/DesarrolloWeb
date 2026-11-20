@@ -1,10 +1,11 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { Router, provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { App } from './app';
 import { routes } from './app.routes';
+import { AuthService } from './core/auth/auth.service';
 
 describe('App', () => {
   it('should create the app', () => {
@@ -16,8 +17,14 @@ describe('App', () => {
 
 describe('rutas de la SPA', () => {
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({
       providers: [provideRouter(routes, withComponentInputBinding()), provideHttpClient(), provideHttpClientTesting()],
+    });
+    TestBed.inject(AuthService).establecerSesion({
+      token: 'token-de-prueba',
+      expiraEn: Date.now() + 3_600_000,
+      usuario: { id: 4, nombre: 'Diego', apellido: 'Ramírez', correo: 'diego@campus.edu', rol: 'ADMINISTRADOR' },
     });
   });
 
@@ -41,6 +48,7 @@ describe('rutas de la SPA', () => {
     ['/admin/categorias', 'Categorías'],
     ['/admin/ubicaciones', 'Ubicaciones'],
     ['/admin/usuarios', 'Usuarios'],
+    ['/acceso-denegado', 'Acceso denegado'],
     ['/esto-no-existe', 'Página no encontrada'],
   ];
 
@@ -50,5 +58,30 @@ describe('rutas de la SPA', () => {
     const pagina = harness.routeNativeElement as HTMLElement;
     expect(pagina.querySelector('main h1')?.textContent).toContain(titulo);
     expect(pagina.querySelector('nav')).toBeTruthy();
+  });
+});
+
+describe('acceso a la SPA', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    TestBed.configureTestingModule({
+      providers: [provideRouter(routes, withComponentInputBinding()), provideHttpClient(), provideHttpClientTesting()],
+    });
+  });
+
+  it('sin sesión lleva al login y recuerda la pantalla pedida', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/reservas');
+
+    const router = TestBed.inject(Router);
+    expect(router.url).toBe('/login?returnUrl=%2Freservas');
+    expect((harness.routeNativeElement as HTMLElement).querySelector('h1')?.textContent).toContain('PontiReservas');
+  });
+
+  it('el login es accesible sin sesión', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/login');
+
+    expect(TestBed.inject(Router).url).toBe('/login');
   });
 });

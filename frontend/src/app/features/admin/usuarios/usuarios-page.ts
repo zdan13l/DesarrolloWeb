@@ -47,6 +47,7 @@ export class UsuariosPage {
     nombre: this.fb.control('', [Validators.required, Validators.maxLength(255)]),
     apellido: this.fb.control('', [Validators.required, Validators.maxLength(255)]),
     correo: this.fb.control('', [Validators.required, Validators.email, Validators.maxLength(255)]),
+    password: this.fb.control('', [Validators.minLength(8), Validators.maxLength(72)]),
     rolId: this.fb.control<number | null>(null, Validators.required),
     activo: this.fb.control(true),
   });
@@ -58,13 +59,14 @@ export class UsuariosPage {
     { clave: 'activo', etiqueta: 'Activo', tipo: 'booleano' },
   ];
 
-  protected invalido(campo: 'nombre' | 'apellido' | 'correo' | 'rolId'): boolean {
+  protected invalido(campo: 'nombre' | 'apellido' | 'correo' | 'password' | 'rolId'): boolean {
     const control = this.formulario.controls[campo];
     return control.invalid && (control.touched || control.dirty);
   }
 
   protected nuevo(): void {
-    this.formulario.reset({ nombre: '', apellido: '', correo: '', rolId: null, activo: true });
+    this.formulario.reset({ nombre: '', apellido: '', correo: '', password: '', rolId: null, activo: true });
+    this.exigirPassword(true);
     this.editando.set('nuevo');
   }
 
@@ -73,10 +75,22 @@ export class UsuariosPage {
       nombre: usuario.nombre,
       apellido: usuario.apellido,
       correo: usuario.correo,
+      password: '',
       rolId: usuario.rolId,
       activo: usuario.activo,
     });
+    this.exigirPassword(false);
     this.editando.set(usuario);
+  }
+
+  private exigirPassword(obligatoria: boolean): void {
+    const control = this.formulario.controls.password;
+    control.setValidators([
+      ...(obligatoria ? [Validators.required] : []),
+      Validators.minLength(8),
+      Validators.maxLength(72),
+    ]);
+    control.updateValueAndValidity();
   }
 
   protected cerrarFormulario(): void {
@@ -97,6 +111,7 @@ export class UsuariosPage {
       correo: valores.correo.trim(),
       activo: valores.activo,
       rolId: valores.rolId as number,
+      ...(valores.password ? { password: valores.password } : {}),
     };
 
     this.guardando.set(true);

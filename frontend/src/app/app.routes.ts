@@ -1,13 +1,18 @@
 import { Routes } from '@angular/router';
+import { autenticadoGuard } from './core/auth/auth.guard';
+import { Login } from './core/auth/login/login';
 import { Shell } from './core/layout/shell/shell';
+import { AccesoDenegado } from './shared/acceso-denegado/acceso-denegado';
 import { NotFound } from './shared/not-found/not-found';
 
 // Cada área se carga de forma perezosa desde su archivo de rutas. Los `data` y los parámetros de ruta
 // llegan como inputs de los componentes (withComponentInputBinding).
 export const routes: Routes = [
+  { path: 'login', component: Login },
   {
     path: '',
     component: Shell,
+    canActivate: [autenticadoGuard],
     children: [
       {
         path: '',
@@ -43,6 +48,7 @@ export const routes: Routes = [
         path: 'admin',
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
+      { path: 'acceso-denegado', component: AccesoDenegado },
       { path: '**', component: NotFound },
     ],
   },

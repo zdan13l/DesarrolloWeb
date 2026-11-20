@@ -11,6 +11,7 @@ import com.sistema.gestion.sistema_gestion_api.modules.usuario.model.Usuario;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.repository.RolRepository;
 import com.sistema.gestion.sistema_gestion_api.modules.usuario.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,15 +25,17 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final ReservaRepository reservaRepository;
     private final PrestamoRepository prestamoRepository;
     private final IncidenteRepository incidenteRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository,
                                ReservaRepository reservaRepository, PrestamoRepository prestamoRepository,
-                               IncidenteRepository incidenteRepository) {
+                               IncidenteRepository incidenteRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.reservaRepository = reservaRepository;
         this.prestamoRepository = prestamoRepository;
         this.incidenteRepository = incidenteRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -66,7 +69,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuarioRepository.existsByCorreoIgnoreCase(dto.correo())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un usuario con ese correo");
         }
+        if (dto.password() == null || dto.password().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contrasena es obligatoria al crear un usuario");
+        }
         Usuario usuario = new Usuario();
+        usuario.setPassword(passwordEncoder.encode(dto.password()));
         usuario.setNombre(dto.nombre());
         usuario.setApellido(dto.apellido());
         usuario.setCorreo(dto.correo());
@@ -83,6 +90,9 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .ifPresent(otro -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un usuario con ese correo");
                 });
+        if (dto.password() != null && !dto.password().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(dto.password()));
+        }
         usuario.setNombre(dto.nombre());
         usuario.setApellido(dto.apellido());
         usuario.setCorreo(dto.correo());

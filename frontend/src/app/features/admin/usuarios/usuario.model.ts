@@ -14,6 +14,8 @@ export interface UsuarioRequest {
   nombre: string;
   apellido: string;
   correo: string;
+  /** Obligatoria al crear; al editar, si se omite se conserva la actual. */
+  password?: string;
   activo: boolean;
   rolId: number;
 }

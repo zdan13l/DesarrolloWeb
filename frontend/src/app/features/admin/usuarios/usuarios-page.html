@@ -43,6 +43,20 @@
           <p class="form-error">Escribe un correo válido.</p>
         }
       </div>
+      <div class="form-field" [class.form-field--error]="invalido('password')">
+        <label for="password">{{ editando() === 'nuevo' ? 'Contraseña' : 'Contraseña nueva (opcional)' }}</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          maxlength="72"
+          autocomplete="new-password"
+          [attr.aria-invalid]="invalido('password')"
+        />
+        @if (invalido('password')) {
+          <p class="form-error">La contraseña debe tener entre 8 y 72 caracteres.</p>
+        }
+      </div>
       <div class="form-field" [class.form-field--error]="invalido('rolId')">
         <label for="rol">Rol</label>
         <select id="rol" formControlName="rolId" [attr.aria-invalid]="invalido('rolId')">

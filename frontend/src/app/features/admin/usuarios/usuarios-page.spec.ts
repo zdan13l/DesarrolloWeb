@@ -70,8 +70,10 @@ describe('UsuariosPage', () => {
     await fixture.whenStable();
     backend.expectNone((r) => r.method === 'POST');
     expect(raiz.querySelector('.form-error')?.textContent).toContain('correo válido');
+    expect(raiz.textContent).toContain('entre 8 y 72 caracteres');
 
     escribir(raiz, 'correo', ' luis@campus.edu ');
+    escribir(raiz, 'password', 'clave12345');
     await fixture.whenStable();
     boton(raiz, 'Guardar').click();
     const post = backend.expectOne((r) => r.method === 'POST' && r.url.endsWith('/usuarios'));
@@ -81,6 +83,7 @@ describe('UsuariosPage', () => {
       correo: 'luis@campus.edu',
       activo: true,
       rolId: 1,
+      password: 'clave12345',
     });
     post.flush({ ...ANA, id: 2, nombre: 'Luis' });
     await fixture.whenStable();
@@ -102,6 +105,22 @@ describe('UsuariosPage', () => {
 
     const put = backend.expectOne((r) => r.method === 'PUT' && r.url.endsWith('/usuarios/1'));
     expect(put.request.body.nombre).toBe('Ana María');
+    expect(put.request.body.password).toBeUndefined();
+    put.flush(ANA);
+  });
+
+  it('al editar solo envía la contraseña si se escribe una nueva', async () => {
+    const fixture = await crear();
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    boton(raiz, 'Editar').click();
+    await fixture.whenStable();
+    expect(raiz.querySelector('label[for="password"]')?.textContent).toContain('opcional');
+    escribir(raiz, 'password', 'nueva-clave-99');
+    boton(raiz, 'Guardar').click();
+
+    const put = backend.expectOne((r) => r.method === 'PUT' && r.url.endsWith('/usuarios/1'));
+    expect(put.request.body.password).toBe('nueva-clave-99');
     put.flush(ANA);
   });
 

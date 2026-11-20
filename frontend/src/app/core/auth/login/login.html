@@ -1,0 +1,44 @@
+<main class="login">
+  <form class="card login__formulario" [formGroup]="formulario" (ngSubmit)="entrar()" novalidate>
+    <h1 class="login__marca">PontiReservas</h1>
+    <p class="texto-suave">Inicia sesión para continuar.</p>
+
+    @if (error(); as mensaje) {
+      <div class="alerta alerta--error" role="alert">
+        <p>{{ mensaje }}</p>
+      </div>
+    }
+
+    <div class="form-field" [class.form-field--error]="invalido('correo')">
+      <label for="correo">Correo</label>
+      <input
+        id="correo"
+        type="email"
+        formControlName="correo"
+        autocomplete="username"
+        [attr.aria-invalid]="invalido('correo')"
+      />
+      @if (invalido('correo')) {
+        <p class="form-error">Escribe un correo válido.</p>
+      }
+    </div>
+
+    <div class="form-field" [class.form-field--error]="invalido('password')">
+      <label for="password">Contraseña</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        [attr.aria-invalid]="invalido('password')"
+      />
+      @if (invalido('password')) {
+        <p class="form-error">Escribe tu contraseña.</p>
+      }
+    </div>
+
+    <button type="submit" class="btn btn--primario login__boton" [disabled]="enviando()">
+      {{ enviando() ? 'Entrando…' : 'Entrar' }}
+    </button>
+  </form>
+</main>

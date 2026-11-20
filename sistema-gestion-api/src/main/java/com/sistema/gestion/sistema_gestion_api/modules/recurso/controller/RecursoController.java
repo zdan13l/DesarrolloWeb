@@ -98,6 +98,19 @@ public class RecursoController {
         return recursoService.actualizar(id, dto);
     }
 
+    @Operation(summary = "Habilitar recurso",
+        description = "Pasa un recurso BLOQUEADO a DISPONIBLE una vez revisado o reparado")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Recurso habilitado"),
+        @ApiResponse(responseCode = "404", description = "El recurso no existe"),
+        @ApiResponse(responseCode = "409", description = "El recurso no está bloqueado")
+    })
+    @PatchMapping("/{id}/habilitar")
+    @ResponseStatus(HttpStatus.OK)
+    public RecursoResponseDTO habilitar(@PathVariable Long id) {
+        return recursoService.habilitarRecurso(id);
+    }
+
     @Operation(summary = "Eliminar recurso",
         description = "No se elimina si tiene reservas, préstamos, incidentes o mantenimientos asociados")
     @ApiResponses({
