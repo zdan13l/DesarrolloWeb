@@ -1,7 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 import { Columna, DataTable } from '../../shared/data-table/data-table';
 import { Prestamo } from './prestamo.model';
 import { PrestamoService } from './prestamo.service';
@@ -15,14 +16,15 @@ const COLUMNAS_BASE: Columna<Prestamo>[] = [
   { clave: 'fechaHoraLimite', etiqueta: 'Límite', tipo: 'fecha' },
 ];
 
-/** CU5 y CU6. Préstamos activos, vencidos e historial, con acceso a entregar y devolver. */
 @Component({
   selector: 'app-prestamos-lista',
   imports: [RouterLink, DataTable],
   template: `
     <header class="page-header">
-      <h1>Préstamos</h1>
-      <a class="btn btn--primario" routerLink="/prestamos/entrega">Registrar entrega</a>
+      <h1>{{ esSolicitante() ? 'Mis préstamos' : 'Préstamos' }}</h1>
+      @if (puedeGestionar()) {
+        <a class="btn btn--primario" routerLink="/prestamos/entrega">Registrar entrega</a>
+      }
     </header>
 
     <div class="pestanas" role="tablist" aria-label="Vista de préstamos">
@@ -45,7 +47,7 @@ const COLUMNAS_BASE: Columna<Prestamo>[] = [
         [columnas]="columnas()"
         [filas]="filas()"
         [cargando]="cargando()"
-        [acciones]="acciones"
+        [acciones]="puedeGestionar() ? acciones : undefined"
         [mensajeVacio]="mensajeVacio()"
       />
       <ng-template #acciones let-prestamo>
@@ -66,6 +68,7 @@ const COLUMNAS_BASE: Columna<Prestamo>[] = [
 })
 export class PrestamosLista {
   private readonly servicio = inject(PrestamoService);
+  private readonly auth = inject(AuthService);
 
   protected readonly pestanas: { clave: Pestana; etiqueta: string }[] = [
     { clave: 'activos', etiqueta: 'Activos' },
@@ -75,22 +78,28 @@ export class PrestamosLista {
 
   protected readonly pestana = signal<Pestana>('activos');
   protected readonly cargando = signal(true);
+  protected readonly esSolicitante = computed(() => this.auth.rol() === 'SOLICITANTE');
+  protected readonly puedeGestionar = computed(() => this.auth.tieneRol('GESTOR', 'ADMINISTRADOR'));
 
-  private readonly datos = toSignal(
-    forkJoin({ todos: this.servicio.listar(), vencidos: this.servicio.vencidos() }).pipe(
-      // El interceptor ya avisó del error; las tres pestañas quedan vacías.
-      catchError(() => of({ todos: [] as Prestamo[], vencidos: [] as Prestamo[] })),
+  private readonly todos = toSignal(
+    this.servicio.listar(this.esSolicitante() ? this.auth.usuario()?.id : undefined).pipe(
+      catchError(() => of<Prestamo[]>([])),
       finalize(() => this.cargando.set(false)),
     ),
-    { initialValue: { todos: [] as Prestamo[], vencidos: [] as Prestamo[] } },
+    { initialValue: [] as Prestamo[] },
   );
 
-  private readonly activos = computed(() => this.datos().todos.filter((p) => p.estadoPrestamo === 'ACTIVO'));
-  private readonly historial = computed(() => this.datos().todos.filter((p) => p.estadoPrestamo === 'DEVUELTO'));
+  private readonly activos = computed(() => this.todos().filter((p) => p.estadoPrestamo === 'ACTIVO'));
+  private readonly historial = computed(() => this.todos().filter((p) => p.estadoPrestamo === 'DEVUELTO'));
+
+  private readonly vencidos = computed(() => {
+    const ahora = Date.now();
+    return this.activos().filter((p) => new Date(p.fechaHoraLimite).getTime() < ahora);
+  });
 
   protected readonly conteo = computed<Record<Pestana, number>>(() => ({
     activos: this.activos().length,
-    vencidos: this.datos().vencidos.length,
+    vencidos: this.vencidos().length,
     historial: this.historial().length,
   }));
 
@@ -99,22 +108,23 @@ export class PrestamosLista {
       case 'activos':
         return this.activos();
       case 'vencidos':
-        return this.datos().vencidos;
+        return this.vencidos();
       case 'historial':
         return this.historial();
     }
   });
 
-  protected readonly columnas = computed<Columna<Prestamo>[]>(() =>
-    this.pestana() === 'historial'
+  protected readonly columnas = computed<Columna<Prestamo>[]>(() => {
+    const base = this.esSolicitante() ? COLUMNAS_BASE.filter((c) => c.clave !== 'usuarioNombre') : COLUMNAS_BASE;
+    return this.pestana() === 'historial'
       ? [
-          ...COLUMNAS_BASE,
+          ...base,
           { clave: 'fechaHoraDevolucion', etiqueta: 'Devuelto', tipo: 'fecha' },
           { clave: 'devolucionTardia', etiqueta: 'Tardía', tipo: 'booleano' },
           { clave: 'estadoFinal', etiqueta: 'Estado final', tipo: 'estado' },
         ]
-      : [...COLUMNAS_BASE, { clave: 'estadoPrestamo', etiqueta: 'Estado', tipo: 'estado' }],
-  );
+      : [...base, { clave: 'estadoPrestamo', etiqueta: 'Estado', tipo: 'estado' }];
+  });
 
   protected readonly mensajeVacio = computed(() => {
     switch (this.pestana()) {

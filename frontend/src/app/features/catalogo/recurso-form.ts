@@ -12,7 +12,6 @@ const SIN_ESPACIOS = Validators.pattern(/\S/);
 
 type CampoForm = 'nombre' | 'categoriaId' | 'ubicacionId' | 'descripcion' | 'caracteristicas';
 
-/** CU9. Alta y edición de recursos (`/recursos/nuevo` y `/recursos/:id/editar`). */
 @Component({
   selector: 'app-recurso-form',
   imports: [ReactiveFormsModule, RouterLink, StatusBadge],
@@ -128,14 +127,12 @@ export class RecursoForm {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
-  /** Presente solo en `/recursos/:id/editar`. */
   readonly id = input<string>();
 
   protected readonly esEdicion = computed(() => !!this.id());
   protected readonly guardando = signal(false);
   protected readonly falloCarga = signal(false);
 
-  // El estado operativo no se edita a mano (CU9): un recurso nuevo nace DISPONIBLE y al editar se conserva.
   protected readonly estadoOperativo = signal<EstadoOperativo>('DISPONIBLE');
 
   protected readonly categorias = toSignal(this.lista(() => this.servicio.categorias()), { initialValue: [] });
@@ -193,7 +190,6 @@ export class RecursoForm {
         this.toast.exito(id ? 'Recurso actualizado' : 'Recurso creado');
         void this.router.navigate(['/catalogo', recurso.id]);
       },
-      // El interceptor ya mostró el motivo (400 por campo, 409...); el formulario conserva lo escrito.
       error: () => undefined,
     });
   }

@@ -19,7 +19,6 @@ export interface Prestamo {
   devolucionTardia: boolean | null;
 }
 
-/** Entrega (CU5). El estado, la fecha de devolución y el estado final los fija el servidor. */
 export interface PrestamoRequest {
   fechaHoraEntrega: string;
   fechaHoraLimite: string;
@@ -31,13 +30,11 @@ export interface PrestamoRequest {
   reservaId: number;
 }
 
-/** Devolución (CU6). */
 export interface DevolucionRequest {
   estadoFinal: EstadoFisico;
   observaciones?: string;
 }
 
-/** Reserva que puede respaldar una entrega. */
 export interface ReservaParaEntrega {
   id: number;
   recursoId: number;

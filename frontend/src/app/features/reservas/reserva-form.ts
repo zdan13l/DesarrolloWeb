@@ -3,26 +3,24 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { catchError, filter, finalize, of, switchMap } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 import { ErrorApi, leerErrorApi } from '../../core/models/api-error';
 import { ToastService } from '../../shared/toast/toast.service';
 import { OpcionRecurso, OpcionUsuario, ReservaRequest } from './reserva.model';
 import { ReservaService } from './reserva.service';
 
-/** `2026-03-05T14:30:00Z` → `2026-03-05T11:30` (hora local, valor de un `datetime-local`). */
 function aValorLocal(iso: string): string {
   const fecha = new Date(iso);
   const dos = (n: number) => String(n).padStart(2, '0');
   return `${fecha.getFullYear()}-${dos(fecha.getMonth() + 1)}-${dos(fecha.getDate())}T${dos(fecha.getHours())}:${dos(fecha.getMinutes())}`;
 }
 
-/** Hora local escrita por la persona → ISO-8601 UTC que espera el backend. */
 function aIso(valorLocal: string): string {
   return new Date(valorLocal).toISOString();
 }
 
 type CampoForm = 'recursoId' | 'usuarioId' | 'inicio' | 'fin';
 
-/** CU2 y CU3. Crear o modificar una reserva; el conflicto de horario (409) se muestra en el propio formulario. */
 @Component({
   selector: 'app-reserva-form',
   imports: [ReactiveFormsModule, RouterLink],
@@ -65,18 +63,25 @@ type CampoForm = 'recursoId' | 'usuarioId' | 'inicio' | 'fin';
           }
         </div>
 
-        <div class="form-field" [class.form-field--error]="invalido('usuarioId')">
-          <label for="usuario">Reservado por</label>
-          <select id="usuario" formControlName="usuarioId">
-            <option [ngValue]="null">Selecciona…</option>
-            @for (u of usuarios(); track u.id) {
-              <option [ngValue]="u.id">{{ u.nombre }} {{ u.apellido }}</option>
+        @if (esSolicitante()) {
+          <div class="form-field">
+            <span class="etiqueta">Reservado por</span>
+            <p class="nombre-sesion">{{ nombreSesion() }}</p>
+          </div>
+        } @else {
+          <div class="form-field" [class.form-field--error]="invalido('usuarioId')">
+            <label for="usuario">Reservado por</label>
+            <select id="usuario" formControlName="usuarioId">
+              <option [ngValue]="null">Selecciona…</option>
+              @for (u of usuarios(); track u.id) {
+                <option [ngValue]="u.id">{{ u.nombre }} {{ u.apellido }}</option>
+              }
+            </select>
+            @if (invalido('usuarioId')) {
+              <p class="form-error">Selecciona un usuario.</p>
             }
-          </select>
-          @if (invalido('usuarioId')) {
-            <p class="form-error">Selecciona un usuario.</p>
-          }
-        </div>
+          </div>
+        }
 
         <div class="form-field" [class.form-field--error]="invalido('inicio')">
           <label for="inicio">Inicio</label>
@@ -102,18 +107,34 @@ type CampoForm = 'recursoId' | 'usuarioId' | 'inicio' | 'fin';
       </div>
     </form>
   `,
+  styles: `
+    .etiqueta {
+      font-weight: 600;
+      font-size: 0.9375rem;
+    }
+    .nombre-sesion {
+      margin: 0;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+    }
+  `,
 })
 export class ReservaForm {
   private readonly servicio = inject(ReservaService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
 
-  /** Presente solo en `/reservas/:id/editar`. */
   readonly id = input<string>();
-  /** `?recursoId=` desde el detalle del recurso. */
   readonly recursoId = input<string>();
 
   protected readonly esEdicion = computed(() => !!this.id());
+  protected readonly esSolicitante = computed(() => this.auth.rol() === 'SOLICITANTE');
+  protected readonly nombreSesion = computed(() => {
+    const usuario = this.auth.usuario();
+    return usuario ? `${usuario.nombre} ${usuario.apellido}` : '';
+  });
   protected readonly guardando = signal(false);
   protected readonly falloCarga = signal(false);
   protected readonly errorApi = signal<ErrorApi | null>(null);
@@ -123,19 +144,20 @@ export class ReservaForm {
     { initialValue: [] },
   );
   protected readonly usuarios = toSignal(
-    this.servicio.usuarios().pipe(catchError(() => of<OpcionUsuario[]>([]))),
+    this.esSolicitante()
+      ? of<OpcionUsuario[]>([])
+      : this.servicio.usuarios().pipe(catchError(() => of<OpcionUsuario[]>([]))),
     { initialValue: [] },
   );
 
   protected readonly form = new FormGroup({
     recursoId: new FormControl<number | null>(null, Validators.required),
-    usuarioId: new FormControl<number | null>(null, Validators.required),
+    usuarioId: new FormControl<number | null>(this.auth.usuario()?.id ?? null, Validators.required),
     inicio: new FormControl('', { nonNullable: true, validators: Validators.required }),
     fin: new FormControl('', { nonNullable: true, validators: Validators.required }),
   });
 
   constructor() {
-    // Al tocar cualquier campo el aviso anterior deja de ser válido.
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.errorApi.set(null));
 
     toObservable(this.recursoId)
@@ -189,7 +211,6 @@ export class ReservaForm {
         this.toast.exito(id ? 'Reserva actualizada' : 'Reserva creada');
         void this.router.navigate(['/reservas']);
       },
-      // Peticiones sin toast: aquí se muestra el motivo, sobre todo el 409 de horario ocupado o recurso bloqueado.
       error: (err: unknown) => this.errorApi.set(leerErrorApi(err)),
     });
   }

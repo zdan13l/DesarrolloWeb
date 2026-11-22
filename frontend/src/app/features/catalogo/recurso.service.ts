@@ -28,7 +28,6 @@ export class RecursoService {
     return this.http.get<Recurso>(`${this.url}/${id}`);
   }
 
-  /** Franjas ocupadas (reservas confirmadas y préstamos activos) del día `fecha` (YYYY-MM-DD). */
   disponibilidad(id: number | string, fecha: string): Observable<FranjaOcupada[]> {
     return this.http.get<FranjaOcupada[]>(`${this.url}/${id}/disponibilidad`, {
       params: { fecha },
@@ -43,7 +42,10 @@ export class RecursoService {
     return this.http.put<Recurso>(`${this.url}/${id}`, recurso);
   }
 
-  // Listas propias para los filtros y el formulario (cada feature hace su GET).
+  habilitar(id: number | string): Observable<Recurso> {
+    return this.http.patch<Recurso>(`${this.url}/${id}/habilitar`, null);
+  }
+
   categorias(): Observable<OpcionCatalogo[]> {
     return this.http.get<OpcionCatalogo[]>(`${environment.apiUrl}/categorias`);
   }

@@ -12,7 +12,6 @@ export interface Reserva {
   usuarioNombre: string;
 }
 
-/** El estado no se envía: el servidor crea la reserva CONFIRMADA y solo cambia con `cancelar`. */
 export interface ReservaRequest {
   fechaHoraInicio: string;
   fechaHoraFin: string;

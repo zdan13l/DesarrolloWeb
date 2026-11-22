@@ -2,12 +2,13 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { catchError, finalize, map, of, switchMap, tap } from 'rxjs';
+import { Subject, catchError, finalize, map, merge, of, switchMap, tap } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
+import { ToastService } from '../../shared/toast/toast.service';
 import { FranjaOcupada } from './recurso.model';
 import { RecursoService } from './recurso.service';
 
-/** Fecha local de hoy como YYYY-MM-DD (valor de un `<input type="date">`). */
 function hoy(): string {
   const ahora = new Date();
   const mes = String(ahora.getMonth() + 1).padStart(2, '0');
@@ -15,7 +16,6 @@ function hoy(): string {
   return `${ahora.getFullYear()}-${mes}-${dia}`;
 }
 
-/** CU1. Detalle del recurso con las franjas ocupadas del día elegido. */
 @Component({
   selector: 'app-recurso-detalle',
   imports: [DatePipe, RouterLink, StatusBadge],
@@ -52,7 +52,14 @@ function hoy(): string {
           <p class="alerta alerta--aviso">El recurso figura como prestado en este momento.</p>
         }
         <div class="form-actions">
-          <a class="btn" [routerLink]="['/recursos', r.id, 'editar']">Editar</a>
+          @if (puedeHabilitar() && r.estadoOperativo === 'BLOQUEADO') {
+            <button type="button" class="btn" [disabled]="habilitando()" (click)="habilitar()">
+              {{ habilitando() ? 'Habilitando…' : 'Habilitar recurso' }}
+            </button>
+          }
+          @if (puedeEditar()) {
+            <a class="btn" [routerLink]="['/recursos', r.id, 'editar']">Editar</a>
+          }
           <a class="btn btn--primario" routerLink="/reservas/nueva" [queryParams]="{ recursoId: r.id }">Reservar</a>
         </div>
       </section>
@@ -116,20 +123,26 @@ function hoy(): string {
 })
 export class RecursoDetalle {
   private readonly servicio = inject(RecursoService);
+  private readonly auth = inject(AuthService);
+  private readonly toast = inject(ToastService);
+  private readonly recargar$ = new Subject<void>();
 
   readonly id = input.required<string>();
 
   protected readonly fecha = signal(hoy());
   protected readonly cargandoFranjas = signal(true);
+  protected readonly habilitando = signal(false);
 
-  /** `undefined` mientras carga, `null` si falló. */
+  protected readonly puedeEditar = computed(() => this.auth.tieneRol('ADMINISTRADOR'));
+  protected readonly puedeHabilitar = computed(() => this.auth.tieneRol('GESTOR', 'ADMINISTRADOR'));
+
   protected readonly recurso = toSignal(
-    toObservable(this.id).pipe(
-      switchMap((id) => this.servicio.obtener(id).pipe(catchError(() => of(null)))),
-    ),
+    merge(
+      toObservable(this.id),
+      this.recargar$.pipe(map(() => this.id())),
+    ).pipe(switchMap((id) => this.servicio.obtener(id).pipe(catchError(() => of(null))))),
   );
 
-  /** Cada cambio de recurso o de día cancela la consulta anterior (switchMap) y pide la nueva. */
   protected readonly franjas = toSignal(
     toObservable(computed(() => ({ id: this.id(), fecha: this.fecha() }))).pipe(
       tap(() => this.cargandoFranjas.set(true)),
@@ -143,6 +156,20 @@ export class RecursoDetalle {
     ),
     { initialValue: [] as FranjaOcupada[] },
   );
+
+  protected habilitar(): void {
+    this.habilitando.set(true);
+    this.servicio
+      .habilitar(this.id())
+      .pipe(finalize(() => this.habilitando.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.exito('Recurso habilitado');
+          this.recargar$.next();
+        },
+        error: () => undefined,
+      });
+  }
 
   protected cambiarFecha(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;

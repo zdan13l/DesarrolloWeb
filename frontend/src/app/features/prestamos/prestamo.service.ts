@@ -5,7 +5,6 @@ import { environment } from '../../../environments/environment';
 import { OMITIR_TOAST_ERROR } from '../../core/interceptors/error.interceptor';
 import { DevolucionRequest, Prestamo, PrestamoRequest, ReservaParaEntrega } from './prestamo.model';
 
-/** Los 409 (RN-03, recurso bloqueado, ya devuelto) los muestra el formulario en línea. */
 const SIN_TOAST = { context: new HttpContext().set(OMITIR_TOAST_ERROR, true) };
 
 @Injectable({ providedIn: 'root' })
@@ -13,13 +12,8 @@ export class PrestamoService {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.apiUrl}/prestamos`;
 
-  listar(): Observable<Prestamo[]> {
-    return this.http.get<Prestamo[]>(this.url);
-  }
-
-  /** Préstamos activos cuyo plazo ya venció. */
-  vencidos(): Observable<Prestamo[]> {
-    return this.http.get<Prestamo[]>(this.url, { params: { vencidos: true } });
+  listar(usuarioId?: number): Observable<Prestamo[]> {
+    return this.http.get<Prestamo[]>(this.url, { params: usuarioId ? { usuarioId } : {} });
   }
 
   obtener(id: number | string): Observable<Prestamo> {
@@ -34,7 +28,6 @@ export class PrestamoService {
     return this.http.patch<Prestamo>(`${this.url}/${id}/devolucion`, devolucion, SIN_TOAST);
   }
 
-  // Lista propia: la entrega parte de una reserva confirmada.
   reservasConfirmadas(): Observable<ReservaParaEntrega[]> {
     return this.http
       .get<ReservaParaEntrega[]>(`${environment.apiUrl}/reservas`)

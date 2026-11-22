@@ -1,20 +1,22 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, debounceTime, distinctUntilChanged, finalize, map, of, startWith, switchMap, tap } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 import { Columna, DataTable } from '../../shared/data-table/data-table';
 import { EstadoOperativo, FiltrosRecurso, OpcionCatalogo, Recurso, TipoRecurso } from './recurso.model';
 import { RecursoService } from './recurso.service';
 
-/** CU1. Catálogo con filtros por categoría, ubicación, tipo y estado. */
 @Component({
   selector: 'app-catalogo-lista',
   imports: [ReactiveFormsModule, RouterLink, DataTable],
   template: `
     <header class="page-header">
       <h1>Catálogo</h1>
-      <a class="btn btn--primario" routerLink="/recursos/nuevo">Nuevo recurso</a>
+      @if (puedeCrear()) {
+        <a class="btn btn--primario" routerLink="/recursos/nuevo">Nuevo recurso</a>
+      }
     </header>
 
     <form class="card" [formGroup]="filtros">
@@ -77,6 +79,9 @@ import { RecursoService } from './recurso.service';
 })
 export class CatalogoLista {
   private readonly servicio = inject(RecursoService);
+  private readonly auth = inject(AuthService);
+
+  protected readonly puedeCrear = computed(() => this.auth.tieneRol('ADMINISTRADOR'));
 
   protected readonly tipos: { valor: TipoRecurso; etiqueta: string }[] = [
     { valor: 'ESPACIO', etiqueta: 'Espacio' },
@@ -100,10 +105,6 @@ export class CatalogoLista {
   protected readonly categorias = toSignal(this.opciones(this.servicio.categorias()), { initialValue: [] });
   protected readonly ubicaciones = toSignal(this.opciones(this.servicio.ubicaciones()), { initialValue: [] });
 
-  /**
-   * Una consulta por cambio de filtros: debounceTime junta los clics seguidos, distinctUntilChanged evita
-   * repetir la misma consulta y switchMap descarta la respuesta anterior si llega una nueva.
-   */
   protected readonly recursos = toSignal(
     this.filtros.valueChanges.pipe(
       debounceTime(300),
@@ -113,7 +114,6 @@ export class CatalogoLista {
       tap(() => this.cargando.set(true)),
       switchMap((filtros) =>
         this.servicio.listar(filtros).pipe(
-          // El interceptor ya avisó del error; la lista queda vacía y los filtros siguen activos.
           catchError(() => of<Recurso[]>([])),
           finalize(() => this.cargando.set(false)),
         ),

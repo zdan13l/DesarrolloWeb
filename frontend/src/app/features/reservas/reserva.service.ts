@@ -5,7 +5,6 @@ import { environment } from '../../../environments/environment';
 import { OMITIR_TOAST_ERROR } from '../../core/interceptors/error.interceptor';
 import { OpcionRecurso, OpcionUsuario, Reserva, ReservaRequest } from './reserva.model';
 
-/** El 409 de conflicto lo muestra el formulario en línea, no como toast. */
 const SIN_TOAST = { context: new HttpContext().set(OMITIR_TOAST_ERROR, true) };
 
 @Injectable({ providedIn: 'root' })
@@ -36,12 +35,11 @@ export class ReservaService {
     return this.http.patch<Reserva>(`${this.url}/${id}/cancelar`, null);
   }
 
-  // Listas propias para los desplegables del formulario.
   recursos(): Observable<OpcionRecurso[]> {
     return this.http.get<OpcionRecurso[]>(`${environment.apiUrl}/recursos`);
   }
 
   usuarios(): Observable<OpcionUsuario[]> {
-    return this.http.get<OpcionUsuario[]>(`${environment.apiUrl}/usuarios`);
+    return this.http.get<OpcionUsuario[]>(`${environment.apiUrl}/usuarios`, { params: { activos: true } });
   }
 }

@@ -10,7 +10,6 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { EstadoFisico } from './prestamo.model';
 import { PrestamoService } from './prestamo.service';
 
-/** CU6. Registrar la devolución de un préstamo activo. */
 @Component({
   selector: 'app-prestamo-devolucion',
   imports: [ReactiveFormsModule, RouterLink, DatePipe, StatusBadge],
@@ -102,7 +101,6 @@ export class PrestamoDevolucion {
   protected readonly guardando = signal(false);
   protected readonly errorApi = signal<ErrorApi | null>(null);
 
-  /** `undefined` mientras carga, `null` si falló. */
   protected readonly prestamo = toSignal(
     toObservable(this.id).pipe(
       switchMap((id) => this.servicio.obtener(id).pipe(catchError(() => of(null)))),
@@ -136,7 +134,6 @@ export class PrestamoDevolucion {
           this.toast.exito(devuelto.devolucionTardia ? 'Devolución registrada (fuera de plazo)' : 'Devolución registrada');
           void this.router.navigate(['/prestamos']);
         },
-        // Un 409 (p. ej. ya devuelto) se muestra aquí, sin toast.
         error: (err: unknown) => this.errorApi.set(leerErrorApi(err)),
       });
   }

@@ -13,13 +13,11 @@ const SIN_ESPACIOS = Validators.pattern(/\S/);
 
 type CampoForm = 'reservaId' | 'fechaHoraEntrega' | 'fechaHoraLimite' | 'accesorios' | 'observaciones';
 
-/** Hora local en formato `datetime-local` (`2026-03-05T11:30`). */
 function aValorLocal(fecha: Date): string {
   const dos = (n: number) => String(n).padStart(2, '0');
   return `${fecha.getFullYear()}-${dos(fecha.getMonth() + 1)}-${dos(fecha.getDate())}T${dos(fecha.getHours())}:${dos(fecha.getMinutes())}`;
 }
 
-/** CU5. Registrar la entrega de un recurso a partir de una reserva confirmada. */
 @Component({
   selector: 'app-prestamo-entrega',
   imports: [ReactiveFormsModule, RouterLink, DatePipe],
@@ -145,7 +143,6 @@ export class PrestamoEntrega {
   constructor() {
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.errorApi.set(null));
 
-    // La reserva fija recurso y usuario; el límite de devolución se propone con el fin de la reserva.
     this.form.controls.reservaId.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       const reserva = this.reservaElegida();
       if (reserva) this.form.controls.fechaHoraLimite.setValue(aValorLocal(new Date(reserva.fechaHoraFin)));
@@ -190,7 +187,6 @@ export class PrestamoEntrega {
           this.toast.exito('Entrega registrada');
           void this.router.navigate(['/prestamos']);
         },
-        // RN-03 (recurso ya prestado), recurso bloqueado o sin modalidad de préstamo llegan como 409.
         error: (err: unknown) => this.errorApi.set(leerErrorApi(err)),
       });
   }

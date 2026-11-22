@@ -26,6 +26,7 @@
 
 .barra {
   display: none;
+  grid-area: barra;
 }
 
 .lateral {
@@ -97,7 +98,10 @@
 @media (max-width: 900px) {
   .marco {
     grid-template-columns: 1fr;
-    grid-template-areas: 'contenido';
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'barra'
+      'contenido';
   }
 
   .barra {

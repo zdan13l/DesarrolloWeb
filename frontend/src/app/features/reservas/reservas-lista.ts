@@ -1,30 +1,38 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject, catchError, filter, finalize, of, switchMap, tap } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 import { ConfirmService } from '../../shared/confirm-dialog/confirm.service';
 import { Columna, DataTable } from '../../shared/data-table/data-table';
 import { ToastService } from '../../shared/toast/toast.service';
 import { Reserva } from './reserva.model';
 import { ReservaService } from './reserva.service';
 
-/** CU2–CU4. Lista de reservas con la opción de cancelar las confirmadas. */
+const COLUMNAS: Columna<Reserva>[] = [
+  { clave: 'recursoNombre', etiqueta: 'Recurso' },
+  { clave: 'usuarioNombre', etiqueta: 'Reservado por' },
+  { clave: 'fechaHoraInicio', etiqueta: 'Inicio', tipo: 'fecha' },
+  { clave: 'fechaHoraFin', etiqueta: 'Fin', tipo: 'fecha' },
+  { clave: 'estadoReserva', etiqueta: 'Estado', tipo: 'estado' },
+];
+
 @Component({
   selector: 'app-reservas-lista',
   imports: [RouterLink, DataTable],
   template: `
     <header class="page-header">
-      <h1>Reservas</h1>
+      <h1>{{ esSolicitante() ? 'Mis reservas' : 'Reservas' }}</h1>
       <a class="btn btn--primario" routerLink="/reservas/nueva">Nueva reserva</a>
     </header>
 
     <section class="card">
       <app-data-table
-        [columnas]="columnas"
+        [columnas]="columnas()"
         [filas]="reservas()"
         [cargando]="cargando()"
         [acciones]="acciones"
-        mensajeVacio="Aún no hay reservas registradas."
+        [mensajeVacio]="esSolicitante() ? 'Aún no tienes reservas.' : 'Aún no hay reservas registradas.'"
       />
       <ng-template #acciones let-reserva>
         @if (reserva.estadoReserva === 'CONFIRMADA') {
@@ -46,17 +54,19 @@ export class ReservasLista {
   private readonly servicio = inject(ReservaService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
 
   private readonly recarga = new BehaviorSubject<void>(undefined);
 
   protected readonly cargando = signal(true);
   protected readonly cancelando = signal<number | null>(null);
+  protected readonly esSolicitante = computed(() => this.auth.rol() === 'SOLICITANTE');
 
   protected readonly reservas = toSignal(
     this.recarga.pipe(
       tap(() => this.cargando.set(true)),
       switchMap(() =>
-        this.servicio.listar().pipe(
+        this.servicio.listar(this.esSolicitante() ? { usuarioId: this.auth.usuario()?.id } : {}).pipe(
           catchError(() => of<Reserva[]>([])),
           finalize(() => this.cargando.set(false)),
         ),
@@ -65,13 +75,9 @@ export class ReservasLista {
     { initialValue: [] as Reserva[] },
   );
 
-  protected readonly columnas: Columna<Reserva>[] = [
-    { clave: 'recursoNombre', etiqueta: 'Recurso' },
-    { clave: 'usuarioNombre', etiqueta: 'Reservado por' },
-    { clave: 'fechaHoraInicio', etiqueta: 'Inicio', tipo: 'fecha' },
-    { clave: 'fechaHoraFin', etiqueta: 'Fin', tipo: 'fecha' },
-    { clave: 'estadoReserva', etiqueta: 'Estado', tipo: 'estado' },
-  ];
+  protected readonly columnas = computed(() =>
+    this.esSolicitante() ? COLUMNAS.filter((columna) => columna.clave !== 'usuarioNombre') : COLUMNAS,
+  );
 
   protected cancelar(reserva: Reserva): void {
     this.confirm
@@ -92,7 +98,6 @@ export class ReservasLista {
           this.toast.exito('Reserva cancelada');
           this.recarga.next();
         },
-        // El motivo (p. ej. "ya ha iniciado") llega como toast desde el interceptor; se refresca por si cambió el estado.
         error: () => this.recarga.next(),
       });
   }
