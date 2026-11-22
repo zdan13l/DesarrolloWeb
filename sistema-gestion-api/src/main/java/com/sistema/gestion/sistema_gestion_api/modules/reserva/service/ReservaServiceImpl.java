@@ -1,5 +1,6 @@
 package com.sistema.gestion.sistema_gestion_api.modules.reserva.service;
 
+import com.sistema.gestion.sistema_gestion_api.modules.auth.service.UsuarioActual;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.EstadoOperativo;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.ModalidadRecurso;
 import com.sistema.gestion.sistema_gestion_api.modules.recurso.model.Recurso;
@@ -25,17 +26,25 @@ public class ReservaServiceImpl implements ReservaService {
     private final ReservaRepository reservaRepository;
     private final RecursoRepository recursoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final UsuarioActual usuarioActual;
 
     public ReservaServiceImpl(ReservaRepository reservaRepository,
-                               RecursoRepository recursoRepository,
-                               UsuarioRepository usuarioRepository) {
+                              RecursoRepository recursoRepository,
+                              UsuarioRepository usuarioRepository,
+                              UsuarioActual usuarioActual) {
         this.reservaRepository = reservaRepository;
         this.recursoRepository = recursoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.usuarioActual = usuarioActual;
     }
 
     @Override
     public List<ReservaResponseDTO> listarTodas() {
+        if (usuarioActual.esSolicitante()) {
+            return reservaRepository.findByUsuarioId(usuarioActual.id()).stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
         return reservaRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
@@ -43,19 +52,29 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Override
     public ReservaResponseDTO obtenerPorId(Long id) {
-        return toResponse(buscarEntidad(id));
+        Reserva reserva = buscarEntidad(id);
+        validarPropiedad(reserva);
+        return toResponse(reserva);
     }
 
     @Override
     public List<ReservaResponseDTO> buscarPorRecurso(Long recursoId) {
-        return reservaRepository.findByRecursoId(recursoId).stream()
+        List<Reserva> reservas = reservaRepository.findByRecursoId(recursoId);
+        if (usuarioActual.esSolicitante()) {
+            Long actualId = usuarioActual.id();
+            reservas = reservas.stream()
+                    .filter(r -> r.getUsuario().getId().equals(actualId))
+                    .toList();
+        }
+        return reservas.stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Override
     public List<ReservaResponseDTO> buscarPorUsuario(Long usuarioId) {
-        return reservaRepository.findByUsuarioId(usuarioId).stream()
+        Long objetivoId = usuarioActual.esSolicitante() ? usuarioActual.id() : usuarioId;
+        return reservaRepository.findByUsuarioId(objetivoId).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -68,11 +87,15 @@ public class ReservaServiceImpl implements ReservaService {
         Recurso recurso = buscarRecurso(dto.recursoId());
         validarReglasRecursoYDisponibilidadCreacion(recurso, dto.fechaHoraInicio(), dto.fechaHoraFin());
 
+        Long usuarioIdEfectivo = usuarioActual.esSolicitante()
+                ? usuarioActual.id()
+                : (dto.usuarioId() != null ? dto.usuarioId() : usuarioActual.id());
+
         Reserva reserva = new Reserva();
         reserva.setFechaCreacion(Instant.now());
         reserva.setEstadoReserva(EstadoReserva.CONFIRMADA);
 
-        aplicarDatos(reserva, dto, recurso);
+        aplicarDatos(reserva, dto, recurso, usuarioIdEfectivo);
         return toResponse(reservaRepository.save(reserva));
     }
 
@@ -80,6 +103,7 @@ public class ReservaServiceImpl implements ReservaService {
     @Transactional
     public ReservaResponseDTO actualizar(Long id, ReservaRequestDTO dto) {
         Reserva reserva = buscarEntidad(id);
+        validarPropiedad(reserva);
 
         if (reserva.getEstadoReserva() != EstadoReserva.CONFIRMADA) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo se pueden modificar reservas en estado CONFIRMADA.");
@@ -93,15 +117,19 @@ public class ReservaServiceImpl implements ReservaService {
         Recurso recurso = buscarRecurso(dto.recursoId());
         validarReglasRecursoYDisponibilidadActualizacion(recurso, dto.fechaHoraInicio(), dto.fechaHoraFin(), id);
 
-        aplicarDatos(reserva, dto, recurso);
+        Long usuarioIdEfectivo = usuarioActual.esSolicitante()
+                ? usuarioActual.id()
+                : (dto.usuarioId() != null ? dto.usuarioId() : reserva.getUsuario().getId());
+
+        aplicarDatos(reserva, dto, recurso, usuarioIdEfectivo);
         return toResponse(reservaRepository.save(reserva));
     }
-
 
     @Override
     @Transactional
     public ReservaResponseDTO cancelar(Long id) {
         Reserva reserva = buscarEntidad(id);
+        validarPropiedad(reserva);
 
         if (reserva.getEstadoReserva() != EstadoReserva.CONFIRMADA) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "La reserva no está en estado CONFIRMADA");
@@ -114,8 +142,6 @@ public class ReservaServiceImpl implements ReservaService {
         return toResponse(reservaRepository.save(reserva));
     }
 
-
-
     @Override
     public void eliminar(Long id) {
         if (!reservaRepository.existsById(id)) {
@@ -124,7 +150,11 @@ public class ReservaServiceImpl implements ReservaService {
         reservaRepository.deleteById(id);
     }
 
-
+    private void validarPropiedad(Reserva reserva) {
+        if (usuarioActual.esSolicitante() && !reserva.getUsuario().getId().equals(usuarioActual.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tiene permiso para acceder o modificar esta reserva");
+        }
+    }
 
     private void validarCoherenciaFechas(Instant inicio, Instant fin) {
         Instant ahora = Instant.now();
@@ -136,27 +166,18 @@ public class ReservaServiceImpl implements ReservaService {
         }
     }
 
-
-
-
     private void validarReglasRecursoYDisponibilidadCreacion(Recurso recurso, Instant inicio, Instant fin) {
-
         if (recurso.getEstadoOperativo() == EstadoOperativo.BLOQUEADO) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El recurso se encuentra BLOQUEADO y no puede ser reservado");
         }
-
         if (recurso.getModalidadRecurso() != ModalidadRecurso.RESERVABLE && recurso.getModalidadRecurso() != ModalidadRecurso.AMBAS) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El recurso no permite la modalidad de reserva");
         }
-
         List<Reserva> solapamientos = reservaRepository.findSolapamientos(recurso.getId(), inicio, fin);
         if (!solapamientos.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Existe un conflicto de horario con otra reserva confirmada");
         }
     }
-
-
-
 
     private void validarReglasRecursoYDisponibilidadActualizacion(Recurso recurso, Instant inicio, Instant fin, Long reservaId) {
         if (recurso.getEstadoOperativo() == EstadoOperativo.BLOQUEADO) {
@@ -165,21 +186,17 @@ public class ReservaServiceImpl implements ReservaService {
         if (recurso.getModalidadRecurso() != ModalidadRecurso.RESERVABLE && recurso.getModalidadRecurso() != ModalidadRecurso.AMBAS) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El recurso no permite la modalidad de reserva");
         }
-
         List<Reserva> solapamientos = reservaRepository.findSolapamientosExcluyendo(recurso.getId(), inicio, fin, reservaId);
         if (!solapamientos.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Existe un conflicto de horario con otra reserva confirmada");
         }
     }
 
-
-
-
-    private void aplicarDatos(Reserva reserva, ReservaRequestDTO dto, Recurso recurso) {
+    private void aplicarDatos(Reserva reserva, ReservaRequestDTO dto, Recurso recurso, Long usuarioId) {
         reserva.setFechaHoraInicio(dto.fechaHoraInicio());
         reserva.setFechaHoraFin(dto.fechaHoraFin());
         reserva.setRecurso(recurso);
-        reserva.setUsuario(buscarUsuario(dto.usuarioId()));
+        reserva.setUsuario(buscarUsuario(usuarioId));
     }
 
     private Reserva buscarEntidad(Long id) {

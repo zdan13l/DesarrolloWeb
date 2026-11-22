@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -30,6 +31,9 @@ public class RecursoController {
         this.recursoService = recursoService;
     }
 
+
+
+
     @Operation(summary = "Listar recursos (catálogo)",
         description = "Filtros opcionales y combinables: categoriaId, ubicacionId, tipo y estado")
     @ApiResponses({
@@ -46,6 +50,9 @@ public class RecursoController {
         return recursoService.buscarConFiltros(categoriaId, ubicacionId, tipo, estado);
     }
 
+
+
+
     @Operation(summary = "Consultar un recurso")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Recurso encontrado"),
@@ -56,6 +63,9 @@ public class RecursoController {
     public RecursoResponseDTO obtener(@PathVariable Long id) {
         return recursoService.obtenerPorId(id);
     }
+
+
+
 
 
     @Operation(summary = "Obtener disponibilidad de un recurso")
@@ -73,17 +83,22 @@ public class RecursoController {
 
 
 
+
     @Operation(summary = "Crear recurso")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Recurso creado"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "404", description = "Categoría o ubicación inexistente")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RecursoResponseDTO crear(@Valid @RequestBody RecursoRequestDTO dto) {
         return recursoService.crear(dto);
     }
+
+
+
 
 
     @Operation(summary = "Actualizar recurso")
@@ -92,11 +107,15 @@ public class RecursoController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "404", description = "El recurso no existe")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public RecursoResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody RecursoRequestDTO dto) {
         return recursoService.actualizar(id, dto);
     }
+
+
+
 
     @Operation(summary = "Habilitar recurso",
         description = "Pasa un recurso BLOQUEADO a DISPONIBLE una vez revisado o reparado")
@@ -105,11 +124,15 @@ public class RecursoController {
         @ApiResponse(responseCode = "404", description = "El recurso no existe"),
         @ApiResponse(responseCode = "409", description = "El recurso no está bloqueado")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PatchMapping("/{id}/habilitar")
     @ResponseStatus(HttpStatus.OK)
     public RecursoResponseDTO habilitar(@PathVariable Long id) {
         return recursoService.habilitarRecurso(id);
     }
+
+
+
 
     @Operation(summary = "Eliminar recurso",
         description = "No se elimina si tiene reservas, préstamos, incidentes o mantenimientos asociados")
@@ -118,6 +141,7 @@ public class RecursoController {
         @ApiResponse(responseCode = "404", description = "El recurso no existe"),
         @ApiResponse(responseCode = "409", description = "El recurso tiene registros asociados")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

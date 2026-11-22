@@ -1,5 +1,6 @@
 package com.sistema.gestion.sistema_gestion_api.modules.prestamo.service;
 
+import com.sistema.gestion.sistema_gestion_api.modules.auth.service.UsuarioActual;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.DevolucionRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.PrestamoRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.prestamo.dto.PrestamoResponseDTO;
@@ -29,19 +30,27 @@ public class PrestamoServiceImpl implements PrestamoService {
     private final RecursoRepository recursoRepository;
     private final UsuarioRepository usuarioRepository;
     private final ReservaRepository reservaRepository;
+    private final UsuarioActual usuarioActual;
 
     public PrestamoServiceImpl(PrestamoRepository prestamoRepository,
-                                RecursoRepository recursoRepository,
-                                UsuarioRepository usuarioRepository,
-                                ReservaRepository reservaRepository) {
+                               RecursoRepository recursoRepository,
+                               UsuarioRepository usuarioRepository,
+                               ReservaRepository reservaRepository,
+                               UsuarioActual usuarioActual) {
         this.prestamoRepository = prestamoRepository;
         this.recursoRepository = recursoRepository;
         this.usuarioRepository = usuarioRepository;
         this.reservaRepository = reservaRepository;
+        this.usuarioActual = usuarioActual;
     }
 
     @Override
     public List<PrestamoResponseDTO> listarTodos() {
+        if (usuarioActual.esSolicitante()) {
+            return prestamoRepository.findByUsuarioId(usuarioActual.id()).stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
         return prestamoRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
@@ -49,26 +58,43 @@ public class PrestamoServiceImpl implements PrestamoService {
 
     @Override
     public PrestamoResponseDTO obtenerPorId(Long id) {
-        return toResponse(buscarEntidad(id));
+        Prestamo prestamo = buscarEntidad(id);
+        validarPropiedad(prestamo);
+        return toResponse(prestamo);
     }
 
     @Override
     public List<PrestamoResponseDTO> buscarPorRecurso(Long recursoId) {
-        return prestamoRepository.findByRecursoId(recursoId).stream()
+        List<Prestamo> prestamos = prestamoRepository.findByRecursoId(recursoId);
+        if (usuarioActual.esSolicitante()) {
+            Long actualId = usuarioActual.id();
+            prestamos = prestamos.stream()
+                    .filter(p -> p.getUsuario().getId().equals(actualId))
+                    .toList();
+        }
+        return prestamos.stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Override
     public List<PrestamoResponseDTO> buscarPorUsuario(Long usuarioId) {
-        return prestamoRepository.findByUsuarioId(usuarioId).stream()
+        Long objetivoId = usuarioActual.esSolicitante() ? usuarioActual.id() : usuarioId;
+        return prestamoRepository.findByUsuarioId(objetivoId).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Override
     public List<PrestamoResponseDTO> buscarVencidos() {
-        return prestamoRepository.buscarVencidos(Instant.now()).stream()
+        List<Prestamo> vencidos = prestamoRepository.buscarVencidos(Instant.now());
+        if (usuarioActual.esSolicitante()) {
+            Long actualId = usuarioActual.id();
+            vencidos = vencidos.stream()
+                    .filter(p -> p.getUsuario().getId().equals(actualId))
+                    .toList();
+        }
+        return vencidos.stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -103,9 +129,6 @@ public class PrestamoServiceImpl implements PrestamoService {
         return toResponse(prestamoRepository.save(prestamo));
     }
 
-
-
-
     @Override
     @Transactional
     public PrestamoResponseDTO registrarDevolucion(Long id, DevolucionRequestDTO dto) {
@@ -123,10 +146,8 @@ public class PrestamoServiceImpl implements PrestamoService {
         }
         prestamo.setEstadoPrestamo(EstadoPrestamo.DEVUELTO);
 
-
         boolean esTardia = ahora.isAfter(prestamo.getFechaHoraLimite());
         prestamo.setDevolucionTardia(esTardia);
-
 
         Recurso recurso = prestamo.getRecurso();
         recurso.setEstadoOperativo(EstadoOperativo.DISPONIBLE);
@@ -134,9 +155,6 @@ public class PrestamoServiceImpl implements PrestamoService {
 
         return toResponse(prestamoRepository.save(prestamo));
     }
-
-
-
 
     @Override
     @Transactional
@@ -152,6 +170,12 @@ public class PrestamoServiceImpl implements PrestamoService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Prestamo no encontrado: " + id);
         }
         prestamoRepository.deleteById(id);
+    }
+
+    private void validarPropiedad(Prestamo prestamo) {
+        if (usuarioActual.esSolicitante() && !prestamo.getUsuario().getId().equals(usuarioActual.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tiene permiso para acceder a este préstamo");
+        }
     }
 
     private void aplicarDatos(Prestamo prestamo, PrestamoRequestDTO dto) {

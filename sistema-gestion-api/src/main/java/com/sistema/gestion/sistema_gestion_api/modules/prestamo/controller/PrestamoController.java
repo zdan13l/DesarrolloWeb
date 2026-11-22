@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,8 +26,11 @@ public class PrestamoController {
         this.prestamoService = prestamoService;
     }
 
+
+
+
     @Operation(summary = "Listar préstamos",
-        description = "Filtros opcionales por recurso o usuario; vencidos=true devuelve los préstamos activos que superaron su fecha límite")
+            description = "Filtros opcionales por recurso o usuario; vencidos=true devuelve los préstamos activos que superaron su fecha límite")
     @ApiResponse(responseCode = "200", description = "Listado de préstamos")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -46,35 +50,49 @@ public class PrestamoController {
         return prestamoService.listarTodos();
     }
 
+
+
+
+
     @Operation(summary = "Consultar un préstamo")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Préstamo encontrado"),
-        @ApiResponse(responseCode = "404", description = "El préstamo no existe")
-    })   
+            @ApiResponse(responseCode = "200", description = "Préstamo encontrado"),
+            @ApiResponse(responseCode = "404", description = "El préstamo no existe")
+    })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PrestamoResponseDTO obtener(@PathVariable Long id) {
         return prestamoService.obtenerPorId(id);
     }
 
+
+
+
+
     @Operation(summary = "Registrar entrega de un equipo")
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Entrega registrada"),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-        @ApiResponse(responseCode = "404", description = "Recurso, usuario o reserva inexistente")
+            @ApiResponse(responseCode = "201", description = "Entrega registrada"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "404", description = "Recurso, usuario o reserva inexistente")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PrestamoResponseDTO crear(@Valid @RequestBody PrestamoRequestDTO dto) {
         return prestamoService.crear(dto);
     }
 
+
+
+
+
     @Operation(summary = "Registrar devolución de un equipo")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Devolución registrada"),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-        @ApiResponse(responseCode = "404", description = "El préstamo no existe")
+            @ApiResponse(responseCode = "200", description = "Devolución registrada"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "404", description = "El préstamo no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PatchMapping("/{id}/devolucion")
     @ResponseStatus(HttpStatus.OK)
     public PrestamoResponseDTO registrarDevolucion(
@@ -84,23 +102,31 @@ public class PrestamoController {
     }
 
 
+
+
+
     @Operation(summary = "Corregir datos de un préstamo")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Préstamo actualizado"),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-        @ApiResponse(responseCode = "404", description = "El préstamo no existe")
+            @ApiResponse(responseCode = "200", description = "Préstamo actualizado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "404", description = "El préstamo no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PrestamoResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody PrestamoRequestDTO dto) {
         return prestamoService.actualizar(id, dto);
     }
 
+
+
+
     @Operation(summary = "Eliminar préstamo")
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Préstamo eliminado"),
-        @ApiResponse(responseCode = "404", description = "El préstamo no existe")
+            @ApiResponse(responseCode = "204", description = "Préstamo eliminado"),
+            @ApiResponse(responseCode = "404", description = "El préstamo no existe")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

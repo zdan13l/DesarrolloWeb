@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +43,9 @@ public class ReservaController {
         return reservaService.listarTodas();
     }
 
+
+
+
     @Operation(summary = "Consultar una reserva")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Reserva encontrada"),
@@ -52,6 +56,10 @@ public class ReservaController {
     public ReservaResponseDTO obtener(@PathVariable Long id) {
         return reservaService.obtenerPorId(id);
     }
+
+
+
+
 
     @Operation(summary = "Crear reserva",
         description = "Valida que el recurso no esté bloqueado y que no haya otra reserva confirmada con horario solapado")
@@ -68,6 +76,8 @@ public class ReservaController {
     }
 
 
+
+
     @Operation(summary = "Modificar reserva",
         description = "Repite la validación de conflictos excluyendo la propia reserva")
     @ApiResponses({
@@ -82,6 +92,9 @@ public class ReservaController {
         return reservaService.actualizar(id, dto);
     }
 
+
+
+
     @Operation(summary = "Cancelar reserva",
         description = "Cancelación lógica: solo reservas CONFIRMADAS que aún no han iniciado; libera la franja horaria")
     @ApiResponses({
@@ -95,11 +108,16 @@ public class ReservaController {
         return reservaService.cancelar(id);
     }
 
+
+
+
+
     @Operation(summary = "Eliminar reserva", description = "Eliminación física, uso administrativo")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Reserva eliminada"),
         @ApiResponse(responseCode = "404", description = "Reserva inexistente")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {
