@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Incidente, IncidenteRequest, RecursoOpcion, UsuarioOpcion } from './incidente.model';
+import { Incidente, IncidenteRequest, RecursoOpcion } from './incidente.model';
 
 @Injectable({ providedIn: 'root' })
 export class IncidenteService {
@@ -24,10 +24,5 @@ export class IncidenteService {
   /** Recursos para el filtro de la lista y el formulario de reporte. */
   recursos(): Observable<RecursoOpcion[]> {
     return this.http.get<RecursoOpcion[]>(`${environment.apiUrl}/recursos`);
-  }
-
-  /** Usuarios activos que pueden figurar como quien reporta. */
-  usuariosActivos(): Observable<UsuarioOpcion[]> {
-    return this.http.get<UsuarioOpcion[]>(`${environment.apiUrl}/usuarios`, { params: { activos: true } });
   }
 }

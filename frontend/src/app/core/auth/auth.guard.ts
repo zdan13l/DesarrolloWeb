@@ -20,3 +20,14 @@ export function rolGuard(...roles: Rol[]): CanActivateFn {
     return inject(Router).createUrlTree(['/acceso-denegado']);
   };
 }
+
+/**
+ * Entrada de la aplicación (`/`): el tablero es para gestor y administrador;
+ * el solicitante va al catálogo en lugar de ver una pantalla de acceso denegado.
+ */
+export const inicioGuard: CanActivateFn = () => {
+  if (inject(AuthService).tieneRol('GESTOR', 'ADMINISTRADOR')) {
+    return true;
+  }
+  return inject(Router).createUrlTree(['/catalogo']);
+};

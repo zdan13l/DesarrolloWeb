@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { IncidenteForm } from './incidente-form';
+import { AuthService } from '../../core/auth/auth.service';
 import { Incidente } from './incidente.model';
 
 describe('IncidenteForm', () => {
@@ -13,6 +14,12 @@ describe('IncidenteForm', () => {
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
     backend = TestBed.inject(HttpTestingController);
+    localStorage.clear();
+    TestBed.inject(AuthService).establecerSesion({
+      token: 't',
+      expiraEn: Date.now() + 3_600_000,
+      usuario: { id: 2, nombre: 'Luis', apellido: 'Pérez', correo: 'luis@campus.edu', rol: 'SOLICITANTE' },
+    });
   });
 
   async function crear() {
@@ -21,9 +28,6 @@ describe('IncidenteForm', () => {
     backend
       .expectOne((r) => r.url.endsWith('/recursos'))
       .flush([{ id: 7, nombre: 'Proyector', estadoOperativo: 'DISPONIBLE' }]);
-    backend
-      .expectOne((r) => r.url.endsWith('/usuarios') && r.params.get('activos') === 'true')
-      .flush([{ id: 2, nombre: 'Luis', apellido: 'Pérez' }]);
     await fixture.whenStable();
     return fixture;
   }
@@ -50,13 +54,43 @@ describe('IncidenteForm', () => {
   async function llenar(fixture: Awaited<ReturnType<typeof crear>>, severidad: string): Promise<HTMLElement> {
     const raiz = fixture.nativeElement as HTMLElement;
     elegirPosicion(raiz, 'recurso', 1); // la posición 0 es el texto «Selecciona un recurso»
-    elegirPosicion(raiz, 'usuario', 1);
     elegir(raiz, 'tipo', 'DANO_FISICO');
     elegir(raiz, 'severidad', severidad);
     escribir(raiz, 'descripcion', '  Se rompió el lente  ');
     await fixture.whenStable();
     return raiz;
   }
+
+  it('muestra como reportante al usuario de la sesión, sin desplegable de usuarios', async () => {
+    const fixture = await crear();
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    expect(raiz.querySelector<HTMLInputElement>('#reportante')?.value).toBe('Luis Pérez');
+    expect(raiz.querySelector('#usuario')).toBeNull();
+  });
+
+  it('el solicitante no ve enlaces a la lista de incidentes', async () => {
+    const fixture = await crear();
+    const enlaces = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('a')).map((a) =>
+      a.getAttribute('href'),
+    );
+
+    expect(enlaces).not.toContain('/incidentes');
+  });
+
+  it('gestor y administrador sí ven el enlace a la lista de incidentes', async () => {
+    TestBed.inject(AuthService).establecerSesion({
+      token: 't',
+      expiraEn: Date.now() + 3_600_000,
+      usuario: { id: 3, nombre: 'Camila', apellido: 'Rojas', correo: 'camila@campus.edu', rol: 'GESTOR' },
+    });
+    const fixture = await crear();
+    const enlaces = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('a')).map((a) =>
+      a.getAttribute('href'),
+    );
+
+    expect(enlaces).toContain('/incidentes');
+  });
 
   it('no envía nada y marca los campos si el formulario está incompleto', async () => {
     const fixture = await crear();
@@ -66,7 +100,7 @@ describe('IncidenteForm', () => {
     await fixture.whenStable();
 
     backend.expectNone((r) => r.method === 'POST');
-    expect(raiz.querySelectorAll('.form-error').length).toBeGreaterThanOrEqual(4);
+    expect(raiz.querySelectorAll('.form-error').length).toBeGreaterThanOrEqual(3);
   });
 
   it('avisa antes de enviar que un incidente crítico bloquea el recurso', async () => {
@@ -91,8 +125,8 @@ describe('IncidenteForm', () => {
       severidadIncidente: 'CRITICA',
       descripcion: 'Se rompió el lente',
       recursoId: 7,
-      usuarioId: 2,
     });
+    expect(peticion.request.body.usuarioId).toBeUndefined();
     expect(peticion.request.body.fecha).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
 
     const respuesta: Incidente = {

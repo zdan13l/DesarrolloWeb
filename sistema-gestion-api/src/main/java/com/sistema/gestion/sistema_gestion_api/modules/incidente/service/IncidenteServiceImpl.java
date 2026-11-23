@@ -1,5 +1,6 @@
 package com.sistema.gestion.sistema_gestion_api.modules.incidente.service;
 
+import com.sistema.gestion.sistema_gestion_api.modules.auth.service.UsuarioActual;
 import com.sistema.gestion.sistema_gestion_api.modules.incidente.dto.IncidenteRequestDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.incidente.dto.IncidenteResponseDTO;
 import com.sistema.gestion.sistema_gestion_api.modules.incidente.model.Incidente;
@@ -23,13 +24,16 @@ public class IncidenteServiceImpl implements IncidenteService {
     private final IncidenteRepository incidenteRepository;
     private final RecursoRepository recursoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final UsuarioActual usuarioActual;
 
     public IncidenteServiceImpl(IncidenteRepository incidenteRepository,
                                  RecursoRepository recursoRepository,
-                                 UsuarioRepository usuarioRepository) {
+                                 UsuarioRepository usuarioRepository,
+                                 UsuarioActual usuarioActual) {
         this.incidenteRepository = incidenteRepository;
         this.recursoRepository = recursoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.usuarioActual = usuarioActual;
     }
 
     @Override
@@ -51,12 +55,16 @@ public class IncidenteServiceImpl implements IncidenteService {
                 .toList();
     }
 
-    /** RN-04: un incidente CRITICA bloquea el recurso en la misma transacción en que se guarda. */
+    /**
+     * RN-04: un incidente CRITICA bloquea el recurso en la misma transacción en que se guarda.
+     * Quien reporta es siempre el usuario de la sesión (el token), nunca un dato del cuerpo.
+     */
     @Override
     @Transactional
     public IncidenteResponseDTO crear(IncidenteRequestDTO dto) {
         Incidente incidente = new Incidente();
         aplicarDatos(incidente, dto);
+        incidente.setUsuario(buscarUsuario(usuarioActual.id()));
         incidente.setRecursoBloqueado(bloquearSiEsCritico(incidente));
         return toResponse(incidenteRepository.save(incidente));
     }
@@ -97,7 +105,6 @@ public class IncidenteServiceImpl implements IncidenteService {
         incidente.setDescripcion(dto.descripcion());
         incidente.setFecha(dto.fecha());
         incidente.setRecurso(buscarRecurso(dto.recursoId()));
-        incidente.setUsuario(buscarUsuario(dto.usuarioId()));
     }
 
     private Incidente buscarEntidad(Long id) {

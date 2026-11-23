@@ -74,6 +74,33 @@
         }
 
         @Test
+        void elIncidenteSeReportaConElUsuarioDeLaSesion() throws Exception {
+                long recurso = crearRecurso("DISPONIBLE");
+
+                // Aunque el cuerpo traiga otro usuarioId, el reportante es quien tiene la sesión (Ana, id 1).
+                String cuerpo = incidente(recurso, "LEVE").replace("\"recursoId\"", "\"usuarioId\":2,\"recursoId\"");
+                mvc.perform(json(post("/api/incidentes"), cuerpo)
+                                .with(com.sistema.gestion.sistema_gestion_api.AuthTestSupport.como(mvc,
+                                        com.sistema.gestion.sistema_gestion_api.AuthTestSupport.Perfil.SOLICITANTE)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.usuarioId").value(1));
+        }
+
+        @Test
+        void editarUnIncidenteConservaAlReportante() throws Exception {
+                long recurso = crearRecurso("DISPONIBLE");
+                long incidente = idDe(mvc.perform(json(post("/api/incidentes"), incidente(recurso, "LEVE"))
+                                .with(com.sistema.gestion.sistema_gestion_api.AuthTestSupport.como(mvc,
+                                        com.sistema.gestion.sistema_gestion_api.AuthTestSupport.Perfil.SOLICITANTE)))
+                        .andExpect(status().isCreated()));
+
+                // Edita el administrador por defecto (id 4): el reportante sigue siendo Ana.
+                mvc.perform(json(put("/api/incidentes/" + incidente), incidente(recurso, "MEDIA")))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.usuarioId").value(1));
+        }
+
+        @Test
         void abrirMantenimientoBloqueaElRecursoYFijaElEstadoInicial() throws Exception {
                 long recurso = crearRecurso("DISPONIBLE");
 
@@ -289,8 +316,8 @@
         private String incidente(long recursoId, String severidad) {
                 return """
                         {"tipoIncidente":"DANO_FISICO","severidadIncidente":"%s","descripcion":"Se rompió",
-                        "fecha":"2026-10-12T15:30:00Z","recursoId":%d,"usuarioId":%d}
-                        """.formatted(severidad, recursoId, USUARIO);
+                        "fecha":"2026-10-12T15:30:00Z","recursoId":%d}
+                        """.formatted(severidad, recursoId);
         }
 
         private String mantenimiento(long recursoId, String estado) {

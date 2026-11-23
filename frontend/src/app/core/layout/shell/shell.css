@@ -31,6 +31,8 @@
 
 .lateral {
   grid-area: lateral;
+  display: flex;
+  flex-direction: column;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -83,6 +85,38 @@
 .lateral__enlace--activo {
   background: rgb(255 255 255 / 0.18);
   font-weight: 600;
+}
+
+.lateral__usuario {
+  margin-top: auto;
+  padding: 16px 8px 0;
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+}
+
+.lateral__nombre {
+  margin: 0;
+  font-weight: 600;
+}
+
+.lateral__rol {
+  margin: 2px 0 12px;
+  font-size: 0.8125rem;
+  opacity: 0.75;
+}
+
+.lateral__salir {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgb(255 255 255 / 0.4);
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lateral__salir:hover {
+  background: rgb(255 255 255 / 0.1);
 }
 
 .contenido {

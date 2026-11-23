@@ -150,7 +150,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
             "mode": "raw",
-            "raw": "{\n  \"recursoId\": 2,\n  \"usuarioId\": 1,\n  \"tipoIncidente\": \"DANO_FISICO\",\n  \"severidadIncidente\": \"CRITICA\",\n  \"descripcion\": \"Se rompio la pantalla del equipo\",\n  \"fecha\": \"2026-10-12T15:30:00Z\"\n}"
+            "raw": "{\n  \"recursoId\": 2,\n  \"tipoIncidente\": \"DANO_FISICO\",\n  \"severidadIncidente\": \"CRITICA\",\n  \"descripcion\": \"Se rompio la pantalla del equipo\",\n  \"fecha\": \"2026-10-12T15:30:00Z\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/incidentes", "host": ["{{baseUrl}}"], "path": ["incidentes"] }
         },

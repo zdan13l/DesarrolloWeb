@@ -93,6 +93,24 @@ describe('UsuariosPage', () => {
     expect(raiz.querySelector('form')).toBeNull();
   });
 
+  it('al crear exige contraseña y rol: sin ellos no envía nada', async () => {
+    const fixture = await crear();
+    const raiz = fixture.nativeElement as HTMLElement;
+
+    boton(raiz, 'Nuevo usuario').click();
+    await fixture.whenStable();
+    expect(raiz.querySelector('label[for="password"]')?.textContent).toBe('Contraseña');
+    escribir(raiz, 'nombre', 'Luis');
+    escribir(raiz, 'apellido', 'Pérez');
+    escribir(raiz, 'correo', 'luis@campus.edu');
+    boton(raiz, 'Guardar').click();
+    await fixture.whenStable();
+
+    backend.expectNone((r) => r.method === 'POST');
+    expect(raiz.textContent).toContain('entre 8 y 72 caracteres');
+    expect(raiz.textContent).toContain('Elige el rol del usuario');
+  });
+
   it('edita un usuario con PUT sobre su id', async () => {
     const fixture = await crear();
     const raiz = fixture.nativeElement as HTMLElement;

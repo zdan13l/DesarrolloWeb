@@ -18,7 +18,7 @@
   <aside id="menu-lateral" class="lateral" [class.lateral--abierto]="menuAbierto()">
     <a class="lateral__marca" routerLink="/">PontiReservas</a>
     <nav aria-label="Navegación principal">
-      @for (seccion of secciones; track $index) {
+      @for (seccion of seccionesVisibles(); track $index) {
         <div class="lateral__seccion">
           @if (seccion.titulo) {
             <p class="lateral__titulo">{{ seccion.titulo }}</p>
@@ -40,6 +40,14 @@
         </div>
       }
     </nav>
+
+    @if (usuario(); as u) {
+      <div class="lateral__usuario">
+        <p class="lateral__nombre">{{ u.nombre }} {{ u.apellido }}</p>
+        <p class="lateral__rol">{{ etiquetaRol(u.rol) }}</p>
+        <button type="button" class="lateral__salir" (click)="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    }
   </aside>
 
   @if (menuAbierto()) {

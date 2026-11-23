@@ -30,7 +30,7 @@ export interface Incidente {
   recursoBloqueado: boolean;
 }
 
-/** Cuerpo de POST /api/incidentes. */
+/** Cuerpo de POST /api/incidentes. Quien reporta lo fija el servidor con el usuario de la sesión. */
 export interface IncidenteRequest {
   tipoIncidente: TipoIncidente;
   severidadIncidente: SeveridadIncidente;
@@ -38,7 +38,6 @@ export interface IncidenteRequest {
   /** ISO-8601 UTC. */
   fecha: string;
   recursoId: number;
-  usuarioId: number;
 }
 
 /** Lo mínimo de un recurso para elegirlo en un desplegable. */
@@ -46,11 +45,4 @@ export interface RecursoOpcion {
   id: number;
   nombre: string;
   estadoOperativo: string;
-}
-
-/** Lo mínimo de un usuario para elegirlo en un desplegable. */
-export interface UsuarioOpcion {
-  id: number;
-  nombre: string;
-  apellido: string;
 }

@@ -1,6 +1,8 @@
 <header class="page-header">
   <h1>Reportar incidente</h1>
-  <a class="btn" routerLink="/incidentes">Volver a incidentes</a>
+  @if (veLista()) {
+    <a class="btn" routerLink="/incidentes">Volver a incidentes</a>
+  }
 </header>
 
 @if (reportado(); as incidente) {
@@ -18,7 +20,11 @@
     }
     <div class="form-actions">
       <button type="button" class="btn" (click)="reportarOtro()">Reportar otro</button>
-      <a class="btn btn--primario" routerLink="/incidentes">Ver incidentes</a>
+      @if (veLista()) {
+        <a class="btn btn--primario" routerLink="/incidentes">Ver incidentes</a>
+      } @else {
+        <a class="btn btn--primario" routerLink="/catalogo">Ir al catálogo</a>
+      }
     </div>
   </section>
 } @else {
@@ -37,17 +43,9 @@
         }
       </div>
 
-      <div class="form-field" [class.form-field--error]="invalido('usuarioId')">
-        <label for="usuario">Quién reporta</label>
-        <select id="usuario" formControlName="usuarioId" [attr.aria-invalid]="invalido('usuarioId')">
-          <option [ngValue]="null" disabled>Selecciona un usuario</option>
-          @for (usuario of usuarios(); track usuario.id) {
-            <option [ngValue]="usuario.id">{{ usuario.nombre }} {{ usuario.apellido }}</option>
-          }
-        </select>
-        @if (invalido('usuarioId')) {
-          <p class="form-error">Elige quién reporta el incidente.</p>
-        }
+      <div class="form-field">
+        <label for="reportante">Quién reporta</label>
+        <input id="reportante" type="text" [value]="reportante()?.nombre + ' ' + reportante()?.apellido" readonly />
       </div>
 
       <div class="form-field" [class.form-field--error]="invalido('tipoIncidente')">
@@ -109,7 +107,7 @@
     }
 
     <div class="form-actions">
-      <a class="btn" routerLink="/incidentes">Cancelar</a>
+      <a class="btn" [routerLink]="veLista() ? '/incidentes' : '/catalogo'">Cancelar</a>
       <button type="submit" class="btn btn--primario" [disabled]="enviando()">
         {{ enviando() ? 'Reportando…' : 'Reportar incidente' }}
       </button>

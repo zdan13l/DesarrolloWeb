@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { autenticadoGuard, rolGuard } from './auth.guard';
+import { autenticadoGuard, inicioGuard, rolGuard } from './auth.guard';
 import { Rol } from './auth.model';
 import { AuthService } from './auth.service';
 
@@ -19,6 +19,8 @@ describe('guards de autenticación', () => {
         provideRouter([
           { path: 'login', component: Zona },
           { path: 'acceso-denegado', component: Zona },
+          { path: 'catalogo', component: Zona },
+          { path: 'inicio', component: Zona, canActivate: [inicioGuard] },
           { path: 'privada', component: Zona, canActivate: [autenticadoGuard] },
           { path: 'gestion', component: Zona, canActivate: [autenticadoGuard, rolGuard('GESTOR', 'ADMINISTRADOR')] },
         ]),
@@ -61,5 +63,19 @@ describe('guards de autenticación', () => {
     await RouterTestingHarness.create('/gestion');
 
     expect(TestBed.inject(Router).url).toBe('/acceso-denegado');
+  });
+
+  it.each(['GESTOR', 'ADMINISTRADOR'] as Rol[])('inicioGuard deja entrar al tablero a %s', async (rol) => {
+    iniciarSesion(rol);
+    await RouterTestingHarness.create('/inicio');
+
+    expect(TestBed.inject(Router).url).toBe('/inicio');
+  });
+
+  it('inicioGuard lleva al solicitante al catálogo', async () => {
+    iniciarSesion('SOLICITANTE');
+    await RouterTestingHarness.create('/inicio');
+
+    expect(TestBed.inject(Router).url).toBe('/catalogo');
   });
 });

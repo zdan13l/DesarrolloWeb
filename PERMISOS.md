@@ -55,6 +55,19 @@
 | Mantenimientos | Todos | Gestor, Administrador |
 | Indicadores | Todos | Gestor, Administrador |
 
+- Al crear un incidente, quien reporta es siempre el usuario del token: el cuerpo ya no lleva `usuarioId`. Al editarlo se conserva el reportante original.
+
+## Pantallas por rol (frontend)
+
+| Pantalla | Quién |
+|---|---|
+| Tablero (`/`) | Gestor, Administrador (el Solicitante pasa al catálogo) |
+| Catálogo, reservas, préstamos (lista), reportar incidente | Todos |
+| Incidentes (lista), mantenimientos | Gestor, Administrador |
+| Administración (categorías, ubicaciones, usuarios) | Administrador |
+
+El menú lateral muestra solo los enlaces permitidos al rol, el nombre del usuario y "Cerrar sesión".
+
 ## Uso
 
 Backend

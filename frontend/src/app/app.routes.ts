@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { autenticadoGuard } from './core/auth/auth.guard';
+import { autenticadoGuard, inicioGuard, rolGuard } from './core/auth/auth.guard';
 import { Login } from './core/auth/login/login';
 import { Shell } from './core/layout/shell/shell';
 import { AccesoDenegado } from './shared/acceso-denegado/acceso-denegado';
@@ -17,6 +17,7 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
+        canActivate: [inicioGuard],
         loadChildren: () => import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
       {
@@ -41,11 +42,13 @@ export const routes: Routes = [
       },
       {
         path: 'mantenimientos',
+        canActivate: [rolGuard('GESTOR', 'ADMINISTRADOR')],
         loadChildren: () =>
           import('./features/mantenimientos/mantenimientos.routes').then((m) => m.MANTENIMIENTOS_ROUTES),
       },
       {
         path: 'admin',
+        canActivate: [rolGuard('ADMINISTRADOR')],
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
       { path: 'acceso-denegado', component: AccesoDenegado },

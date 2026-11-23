@@ -2,6 +2,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 import { catchError, finalize, of } from 'rxjs';
 import { ahoraParaInput, inputAIso } from './fecha-local';
 import {
@@ -22,14 +23,17 @@ import { IncidenteService } from './incidente.service';
 export class IncidenteForm {
   private readonly servicio = inject(IncidenteService);
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly auth = inject(AuthService);
+
+  /** Quien reporta: el usuario de la sesión. */
+  protected readonly reportante = this.auth.usuario;
+  /** Solo gestor y administrador pueden ver la lista de incidentes. */
+  protected readonly veLista = computed(() => this.auth.rol() === 'GESTOR' || this.auth.rol() === 'ADMINISTRADOR');
 
   protected readonly tipos = TIPOS_INCIDENTE;
   protected readonly severidades = SEVERIDADES;
 
   protected readonly recursos = toSignal(this.servicio.recursos().pipe(catchError(() => of([]))), {
-    initialValue: [],
-  });
-  protected readonly usuarios = toSignal(this.servicio.usuariosActivos().pipe(catchError(() => of([]))), {
     initialValue: [],
   });
 
@@ -43,7 +47,6 @@ export class IncidenteForm {
     descripcion: this.fb.control('', [Validators.required, Validators.maxLength(255)]),
     fecha: this.fb.control(ahoraParaInput(), Validators.required),
     recursoId: this.fb.control<number | null>(null, Validators.required),
-    usuarioId: this.fb.control<number | null>(null, Validators.required),
   });
 
   private readonly severidadElegida = toSignal(this.formulario.controls.severidadIncidente.valueChanges, {
@@ -70,7 +73,6 @@ export class IncidenteForm {
       descripcion: valores.descripcion.trim(),
       fecha: inputAIso(valores.fecha),
       recursoId: valores.recursoId as number,
-      usuarioId: valores.usuarioId as number,
     };
 
     this.enviando.set(true);
@@ -91,7 +93,6 @@ export class IncidenteForm {
       descripcion: '',
       fecha: ahoraParaInput(),
       recursoId: null,
-      usuarioId: null,
     });
   }
 }

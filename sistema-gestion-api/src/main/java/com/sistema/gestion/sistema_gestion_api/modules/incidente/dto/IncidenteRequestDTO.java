@@ -9,7 +9,7 @@ import java.time.Instant;
 
 public record IncidenteRequestDTO(
         @NotNull(message = "El tipo de incidente es obligatorio")
-        TipoIncidente tipoIncidente, //TODO - Revisar porque hay hay parametros que podrían eliminarse
+        TipoIncidente tipoIncidente,
         @NotNull(message = "La severidad es obligatoria")
         SeveridadIncidente severidadIncidente,
         @NotBlank(message = "La descripcion es obligatoria")
@@ -17,8 +17,6 @@ public record IncidenteRequestDTO(
         @NotNull(message = "La fecha es obligatoria")
         Instant fecha,
         @NotNull(message = "El recurso es obligatorio")
-        Long recursoId,
-        @NotNull(message = "El usuario es obligatorio")
-        Long usuarioId
+        Long recursoId
 ) {
 }

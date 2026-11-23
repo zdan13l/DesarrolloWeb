@@ -30,9 +30,30 @@ describe('permisos por rol en las rutas de operación', () => {
     return TestBed.inject(Router).url;
   }
 
-  const soloGestion = ['/prestamos/entrega', '/prestamos/4/devolucion'];
-  const soloAdministrador = ['/recursos/nuevo', '/recursos/3/editar'];
-  const abiertas = ['/catalogo', '/catalogo/3', '/reservas', '/reservas/nueva', '/reservas/2/editar', '/prestamos'];
+  const soloGestion = [
+    '/prestamos/entrega',
+    '/prestamos/4/devolucion',
+    '/incidentes',
+    '/mantenimientos',
+    '/mantenimientos/nuevo',
+    '/mantenimientos/1',
+  ];
+  const soloAdministrador = [
+    '/recursos/nuevo',
+    '/recursos/3/editar',
+    '/admin/categorias',
+    '/admin/ubicaciones',
+    '/admin/usuarios',
+  ];
+  const abiertas = [
+    '/catalogo',
+    '/catalogo/3',
+    '/reservas',
+    '/reservas/nueva',
+    '/reservas/2/editar',
+    '/prestamos',
+    '/incidentes/reportar',
+  ];
 
   it.each(abiertas)('%s está abierta a los tres roles', async (url) => {
     expect(await ir('SOLICITANTE', url)).toBe(url);
@@ -50,5 +71,11 @@ describe('permisos por rol en las rutas de operación', () => {
     expect(await ir('SOLICITANTE', url)).toBe('/acceso-denegado');
     expect(await ir('GESTOR', url)).toBe('/acceso-denegado');
     expect(await ir('ADMINISTRADOR', url)).toBe(url);
+  });
+
+  it('el tablero (/) es para gestor y administrador; el solicitante pasa al catálogo', async () => {
+    expect(await ir('SOLICITANTE', '/')).toBe('/catalogo');
+    expect(await ir('GESTOR', '/')).toBe('/');
+    expect(await ir('ADMINISTRADOR', '/')).toBe('/');
   });
 });
