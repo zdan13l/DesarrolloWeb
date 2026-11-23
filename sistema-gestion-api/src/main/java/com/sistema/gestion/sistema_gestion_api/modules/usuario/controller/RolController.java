@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /** Catálogo de roles (solo lectura) para poblar el desplegable del formulario de usuarios. */
 @Tag (name = "Roles", description = "Consulta de roles del sistema")
@@ -27,6 +28,7 @@ public class RolController {
 
     @Operation(summary = "Listar roles", description = "Listado de roles disponibles en el sistema")
     @ApiResponse(responseCode = "200", description = "Listado de roles")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<RolResponseDTO> listar() {

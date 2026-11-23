@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Tag(name = "Incidentes", description = "Reporte de daños o fallas de los recursos")
 @RestController
@@ -26,6 +27,7 @@ public class IncidenteController {
 
     @Operation(summary = "Listar incidentes", description = "Filtro opcional por recurso")
     @ApiResponse(responseCode = "200", description = "Listado de incidentes")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<IncidenteResponseDTO> listar(@RequestParam(required = false) Long recursoId) {
@@ -40,6 +42,7 @@ public class IncidenteController {
         @ApiResponse(responseCode = "200", description = "Incidente encontrado"),
         @ApiResponse(responseCode = "404", description = "El incidente no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public IncidenteResponseDTO obtener(@PathVariable Long id) {
@@ -64,6 +67,7 @@ public class IncidenteController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "404", description = "El incidente o el recurso no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public IncidenteResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody IncidenteRequestDTO dto) {
@@ -75,6 +79,7 @@ public class IncidenteController {
         @ApiResponse(responseCode = "204", description = "Incidente eliminado"),
         @ApiResponse(responseCode = "404", description = "El incidente no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

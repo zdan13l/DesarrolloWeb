@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /** Servicios de solo lectura para el tablero operativo y los indicadores básicos. */
 @Tag(name = "Indicadores", description = "Métricas, estadísticas consolidadas y estado operativo de recursos para el dashboard")
@@ -27,6 +28,7 @@ public class IndicadoresController {
 
     @Operation(summary = "Estado operativo de recursos", description = "Cantidad de recursos por estado operativo")
     @ApiResponse(responseCode = "200", description = "Listado de recursos por estado operativo")    
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping("/estado-recursos")
     public List<EstadoRecursoDTO> estadoRecursos() {
         return service.estadoRecursos();
@@ -34,6 +36,7 @@ public class IndicadoresController {
 
     @Operation(summary = "Reservas por recurso", description = "Cantidad de reservas por recurso")
     @ApiResponse(responseCode = "200", description = "Listado de reservas por recurso")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping("/reservas-por-recurso")
     public List<ConteoDTO> reservasPorRecurso() {
         return service.reservasPorRecurso();
@@ -41,6 +44,7 @@ public class IndicadoresController {
 
     @Operation(summary = "Reservas por categoría", description = "Cantidad de reservas por categoría de recurso")
     @ApiResponse(responseCode = "200", description = "Listado de reservas por categoría")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping("/reservas-por-categoria")
     public List<ConteoDTO> reservasPorCategoria() {
         return service.reservasPorCategoria();
@@ -48,6 +52,7 @@ public class IndicadoresController {
 
     @Operation(summary = "Resumen de indicadores", description = "Cantidad total de recursos, reservas y usuarios")
     @ApiResponse(responseCode = "200", description = "Resumen de indicadores")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping("/resumen")
     public ResumenDTO resumen() {
         return service.resumen();

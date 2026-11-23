@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Tag(name = "Categorías", description = "Gestión de categorías y clasificación de recursos")
 @RestController
@@ -51,6 +52,7 @@ public class CategoriaController {
         @ApiResponse(responseCode = "201", description = "Categoría creada"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CategoriaResponseDTO crear(@Valid @RequestBody CategoriaRequestDTO dto) {
@@ -63,6 +65,7 @@ public class CategoriaController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "404", description = "La categoría no existe")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CategoriaResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO dto) {
@@ -74,6 +77,7 @@ public class CategoriaController {
         @ApiResponse(responseCode = "204", description = "Categoría eliminada"),
         @ApiResponse(responseCode = "404", description = "La categoría no existe")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

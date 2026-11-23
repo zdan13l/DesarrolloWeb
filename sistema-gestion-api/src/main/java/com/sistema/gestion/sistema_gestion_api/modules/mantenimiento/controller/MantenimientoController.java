@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Tag(name = "Mantenimientos", description = "Intervenciones hasta habilitar de nuevo el recurso")
 @RestController
@@ -26,6 +27,7 @@ public class MantenimientoController {
 
     @Operation(summary = "Listar mantenimientos", description = "Filtro opcional por recurso")
     @ApiResponse(responseCode = "200", description = "Listado de mantenimientos")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<MantenimientoResponseDTO> listar(@RequestParam(required = false) Long recursoId) {
@@ -40,6 +42,7 @@ public class MantenimientoController {
         @ApiResponse(responseCode = "200", description = "Mantenimiento encontrado"),
         @ApiResponse(responseCode = "404", description = "El mantenimiento no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public MantenimientoResponseDTO obtener(@PathVariable Long id) {
@@ -52,6 +55,7 @@ public class MantenimientoController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "404", description = "Recurso inexistente")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MantenimientoResponseDTO crear(@Valid @RequestBody MantenimientoRequestDTO dto) {
@@ -64,6 +68,7 @@ public class MantenimientoController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "404", description = "El mantenimiento o el recurso no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public MantenimientoResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody MantenimientoRequestDTO dto) {
@@ -75,6 +80,7 @@ public class MantenimientoController {
         @ApiResponse(responseCode = "200", description = "Mantenimiento finalizado"),
         @ApiResponse(responseCode = "404", description = "El mantenimiento no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PatchMapping("/{id}/finalizar")
     @ResponseStatus(HttpStatus.OK)
     public MantenimientoResponseDTO finalizar(@PathVariable Long id,
@@ -87,6 +93,7 @@ public class MantenimientoController {
         @ApiResponse(responseCode = "200", description = "Mantenimiento cancelado"),
         @ApiResponse(responseCode = "404", description = "El mantenimiento no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PatchMapping("/{id}/cancelar")
     @ResponseStatus(HttpStatus.OK)
     public MantenimientoResponseDTO cancelar(@PathVariable Long id) {
@@ -98,6 +105,7 @@ public class MantenimientoController {
         @ApiResponse(responseCode = "204", description = "Mantenimiento eliminado"),
         @ApiResponse(responseCode = "404", description = "El mantenimiento no existe")
     })  
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

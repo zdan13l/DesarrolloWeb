@@ -5,6 +5,7 @@ import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { OMITIR_TOAST_ERROR } from '../interceptors/error.interceptor';
 import { LoginRequest, LoginResponse, Rol, Sesion, UsuarioSesion } from './auth.model';
+import { leerClaims } from './jwt';
 
 const CLAVE_SESION = 'pontireservas.sesion';
 
@@ -60,6 +61,10 @@ export class AuthService {
 
   cerrarSesion(): void {
     this._sesion.set(null);
+    this.borrarGuardada();
+  }
+
+  private borrarGuardada(): void {
     try {
       localStorage.removeItem(CLAVE_SESION);
     } catch {
@@ -76,13 +81,29 @@ export class AuthService {
     }
   }
 
+  /**
+   * Recupera la sesión de localStorage, que el usuario puede editar a mano. Por eso el rol, el id y el
+   * vencimiento deben coincidir con lo que dice el propio token; si algo no cuadra se descarta la sesión.
+   * (La firma del token solo la puede verificar el backend, que lo hace en cada petición.)
+   */
   private leerSesionGuardada(): Sesion | null {
     try {
       const guardada = localStorage.getItem(CLAVE_SESION);
       if (guardada === null) return null;
       const sesion = JSON.parse(guardada) as Sesion;
-      return Date.now() < sesion.expiraEn ? sesion : null;
+      const claims = leerClaims(sesion.token);
+      const coincide =
+        claims !== null &&
+        claims.sub === String(sesion.usuario?.id) &&
+        claims.rol === sesion.usuario.rol &&
+        claims.correo === sesion.usuario.correo;
+      if (!coincide || Date.now() >= claims.exp * 1000) {
+        this.borrarGuardada();
+        return null;
+      }
+      return { ...sesion, expiraEn: claims.exp * 1000 };
     } catch {
+      this.borrarGuardada();
       return null;
     }
   }

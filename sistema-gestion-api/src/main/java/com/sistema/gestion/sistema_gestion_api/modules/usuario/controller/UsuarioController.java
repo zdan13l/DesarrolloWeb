@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Tag(name = "Usuarios", description = "Administración de usuarios y cuentas del sistema")
 @RestController
@@ -36,6 +37,7 @@ public class UsuarioController {
     @Operation(summary = "Listar usuarios",
             description = "Con activos=true devuelve solo los usuarios activos")
     @ApiResponse(responseCode = "200", description = "Listado de usuarios")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<UsuarioResponseDTO> listar(@RequestParam(required = false) Boolean activos) {
@@ -50,6 +52,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
         @ApiResponse(responseCode = "404", description = "El usuario no existe")
     })
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UsuarioResponseDTO obtener(@PathVariable Long id) {
@@ -62,6 +65,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "409", description = "Ya existe un usuario con ese correo")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UsuarioResponseDTO crear(@Valid @RequestBody UsuarioRequestDTO dto) {
@@ -74,6 +78,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "404", description = "El usuario no existe")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UsuarioResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody UsuarioRequestDTO dto) {
@@ -85,6 +90,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "204", description = "Usuario eliminado"),
         @ApiResponse(responseCode = "404", description = "El usuario no existe")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

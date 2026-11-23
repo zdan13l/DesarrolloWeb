@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Tag(name = "Ubicaciones", description = "Gestión de ubicaciones físicas y espacios del campus")
 @RestController
@@ -51,6 +52,7 @@ public class UbicacionController {
         @ApiResponse(responseCode = "201", description = "Ubicación creada"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UbicacionResponseDTO crear(@Valid @RequestBody UbicacionRequestDTO dto) {
@@ -63,6 +65,7 @@ public class UbicacionController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "404", description = "La ubicación no existe")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UbicacionResponseDTO actualizar(@PathVariable Long id, @Valid @RequestBody UbicacionRequestDTO dto) {
@@ -74,6 +77,7 @@ public class UbicacionController {
         @ApiResponse(responseCode = "204", description = "Ubicación eliminada"),
         @ApiResponse(responseCode = "404", description = "La ubicación no existe")
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

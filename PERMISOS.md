@@ -57,6 +57,13 @@
 
 - Al crear un incidente, quien reporta es siempre el usuario del token: el cuerpo ya no lleva `usuarioId`. Al editarlo se conserva el reportante original.
 
+## Seguridad del token
+
+- El backend verifica la firma HS256 del JWT en cada petición: un token con el payload cambiado, sin firma, con `alg=none`, firmado con otra clave o vencido responde 401. El rol sale solo del claim firmado.
+- Los permisos de la tabla anterior los aplica el backend con `@PreAuthorize` en cada controller; ocultar pantallas en la interfaz no es una medida de seguridad. Un token válido del rol equivocado responde 403.
+- `JWT_SECRETO` debe definirse en producción: el valor por defecto de `application.properties` es público en el repositorio y permitiría firmar tokens con cualquier rol.
+- Pruebas: `JwtIntegridadTests` (tokens alterados) y `PermisosPorRolTests` (rol por endpoint).
+
 ## Pantallas por rol (frontend)
 
 | Pantalla | Quién |
