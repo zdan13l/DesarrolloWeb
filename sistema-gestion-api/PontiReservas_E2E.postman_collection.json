@@ -1,214 +1,417 @@
+{
+  "info": {
+    "name": "PontiReservas - Flujo End-to-End (Con Autenticacion JWT)",
+    "description": "Colección de pruebas de sistema E2E para PontiReservas con autenticación por roles (Administrador, Solicitante y Gestor).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "tokenAdmin", "value": "" },
+    { "key": "tokenSolicitante", "value": "" },
+    { "key": "tokenGestor", "value": "" },
+    { "key": "recursoE2EId", "value": "" },
+    { "key": "reservaId", "value": "" },
+    { "key": "prestamoId", "value": "" },
+    { "key": "mantenimientoId", "value": "" },
+    { "key": "fechaInicio1", "value": "" },
+    { "key": "fechaFin1", "value": "" },
+    { "key": "fechaInicioSolapada", "value": "" },
+    { "key": "fechaFinSolapada", "value": "" },
+    { "key": "fechaEntrega", "value": "" },
+    { "key": "fechaLimiteVencida", "value": "" },
+    { "key": "fechaAhora", "value": "" },
+    { "key": "fechaInicio2", "value": "" },
+    { "key": "fechaFin2", "value": "" }
+  ],
+  "item": [
     {
-    "info": {
-        "name": "PontiReservas - Flujo End-to-End",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      "name": "0.1 Login Administrador",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const ahora = Date.now();",
+              "const h = 3600 * 1000;",
+              "pm.collectionVariables.set('fechaAhora', new Date(ahora).toISOString());",
+              "pm.collectionVariables.set('fechaInicio1', new Date(ahora + 2 * h).toISOString());",
+              "pm.collectionVariables.set('fechaFin1', new Date(ahora + 4 * h).toISOString());",
+              "pm.collectionVariables.set('fechaInicioSolapada', new Date(ahora + 3 * h).toISOString());",
+              "pm.collectionVariables.set('fechaFinSolapada', new Date(ahora + 5 * h).toISOString());",
+              "pm.collectionVariables.set('fechaEntrega', new Date(ahora - 4 * h).toISOString());",
+              "pm.collectionVariables.set('fechaLimiteVencida', new Date(ahora - 1 * h).toISOString());",
+              "pm.collectionVariables.set('fechaInicio2', new Date(ahora + 24 * h).toISOString());",
+              "pm.collectionVariables.set('fechaFin2', new Date(ahora + 26 * h).toISOString());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login Administrador exitoso (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.token).to.be.a('string');",
+              "    pm.collectionVariables.set('tokenAdmin', json.token);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"diego.ramirez@campus.edu\",\n  \"password\": \"admin12345\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+      }
     },
-    "variable": [
+    {
+      "name": "0.2 Login Solicitante",
+      "event": [
         {
-        "key": "baseUrl",
-        "value": "http://localhost:8080/api"
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login Solicitante exitoso (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.token).to.be.a('string');",
+              "    pm.collectionVariables.set('tokenSolicitante', json.token);",
+              "});"
+            ]
+          }
         }
-    ],
-    "item": [
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"ana.martinez@campus.edu\",\n  \"password\": \"solicitante123\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+      }
+    },
+    {
+      "name": "0.3 Login Gestor",
+      "event": [
         {
-        "name": "1. Crear Reserva Exitosa",
-        "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-            "mode": "raw",
-            "raw": "{\n  \"recursoId\": 1,\n  \"usuarioId\": 1,\n  \"fechaHoraInicio\": \"2026-11-01T08:00:00Z\",\n  \"fechaHoraFin\": \"2026-11-01T10:00:00Z\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('Reserva creada con exito (201)', function () {",
-                "    pm.response.to.have.status(201);",
-                "    pm.collectionVariables.set('reservaId', pm.response.json().id);",
-                "});"
-                ]
-            }
-            }
-        ]
-        },
-        {
-        "name": "2. Validar Solapamiento Horario",
-        "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-            "mode": "raw",
-            "raw": "{\n  \"recursoId\": 1,\n  \"usuarioId\": 2,\n  \"fechaHoraInicio\": \"2026-11-01T09:00:00Z\",\n  \"fechaHoraFin\": \"2026-11-01T11:00:00Z\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('Detecta conflicto de solapamiento (409)', function () {",
-                "    pm.response.to.have.status(409);",
-                "});"
-                ]
-            }
-            }
-        ]
-        },
-        {
-        "name": "2.1 Cancelar Reserva",
-        "request": {
-            "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/reservas/1/cancelar", "host": ["{{baseUrl}}"], "path": ["reservas", "{{reservaId}}", "cancelar"] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('Reserva cancelada (200)', function () {",
-                "    pm.response.to.have.status(200);",
-                "});",
-                "pm.test('Estado de la reserva es CANCELADA', function () {",
-                "    pm.expect(pm.response.json().estadoReserva).to.eql('CANCELADA');",
-                "});"
-                ]
-            }
-            }
-        ]
-        },
-        {
-        "name": "2.2 Cancelar Reserva Ya Cancelada",
-        "request": {
-            "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/reservas/1/cancelar", "host": ["{{baseUrl}}"], "path": ["reservas", "{{reservaId}}", "cancelar"] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('Rechaza cancelar una reserva no confirmada (409)', function () {",
-                "    pm.response.to.have.status(409);",
-                "});"
-                ]
-            }
-            }
-        ]
-        },
-        {
-        "name": "2.3 Cancelar Reserva Inexistente",
-        "request": {
-            "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/reservas/999999/cancelar", "host": ["{{baseUrl}}"], "path": ["reservas", "999999", "cancelar"] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('Reserva inexistente (404)', function () {",
-                "    pm.response.to.have.status(404);",
-                "});"
-                ]
-            }
-            }
-        ]
-        },
-        {
-        "name": "2.4 Franja Liberada Tras Cancelar",
-        "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-            "mode": "raw",
-            "raw": "{\n  \"recursoId\": 1,\n  \"usuarioId\": 2,\n  \"fechaHoraInicio\": \"2026-11-01T09:00:00Z\",\n  \"fechaHoraFin\": \"2026-11-01T11:00:00Z\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('La franja cancelada vuelve a estar libre (201)', function () {",
-                "    pm.response.to.have.status(201);",
-                "});"
-                ]
-            }
-            }
-        ]
-        },
-        {
-        "name": "3. Reportar Incidente Crítico",
-        "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-            "mode": "raw",
-            "raw": "{\n  \"recursoId\": 2,\n  \"tipoIncidente\": \"DANO_FISICO\",\n  \"severidadIncidente\": \"CRITICA\",\n  \"descripcion\": \"Se rompio la pantalla del equipo\",\n  \"fecha\": \"2026-10-12T15:30:00Z\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/incidentes", "host": ["{{baseUrl}}"], "path": ["incidentes"] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('Incidente critico registrado y recurso bloqueado (201)', function () {",
-                "    pm.response.to.have.status(201);",
-                "});"
-                ]
-            }
-            }
-        ]
-        },
-        {
-        "name": "4. Validar Recurso Bloqueado",
-        "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-            "mode": "raw",
-            "raw": "{\n  \"recursoId\": 2,\n  \"usuarioId\": 1,\n  \"fechaHoraInicio\": \"2026-11-02T08:00:00Z\",\n  \"fechaHoraFin\": \"2026-11-02T10:00:00Z\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('Rechaza reserva por recurso bloqueado (409)', function () {",
-                "    pm.response.to.have.status(409);",
-                "});"
-                ]
-            }
-            }
-        ]
-        },
-        {
-        "name": "5. Finalizar Mantenimiento y Habilitar",
-        "request": {
-            "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/mantenimientos/1/finalizar?habilitarRecurso=true", "host": ["{{baseUrl}}"], "path": ["mantenimientos", "1", "finalizar"], "query": [{ "key": "habilitarRecurso", "value": "true" }] }
-        },
-        "event": [
-            {
-            "listen": "test",
-            "script": {
-                "exec": [
-                "pm.test('Mantenimiento finalizado y recurso habilitado (200)', function () {",
-                "    pm.response.to.have.status(200);",
-                "});"
-                ]
-            }
-            }
-        ]
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login Gestor exitoso (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.token).to.be.a('string');",
+              "    pm.collectionVariables.set('tokenGestor', json.token);",
+              "});"
+            ]
+          }
         }
-    ]
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"camila.rojas@campus.edu\",\n  \"password\": \"gestor12345\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+      }
+    },
+    {
+      "name": "1. Crear Recurso Disponible (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Recurso creado en estado DISPONIBLE (201)', function () {",
+              "    pm.response.to.have.status(201);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.estadoOperativo).to.eql('DISPONIBLE');",
+              "    pm.collectionVariables.set('recursoE2EId', json.id);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Kit Camara E2E Postman\",\n  \"tipoRecurso\": \"EQUIPO\",\n  \"descripcion\": \"Camara 4K para prueba end-to-end\",\n  \"caracteristicas\": \"Lente 24-70mm\",\n  \"modalidadRecurso\": \"AMBAS\",\n  \"estadoOperativo\": \"DISPONIBLE\",\n  \"categoriaId\": 1,\n  \"ubicacionId\": 1\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/recursos", "host": ["{{baseUrl}}"], "path": ["recursos"] }
+      }
+    },
+    {
+      "name": "2. Crear Reserva Exitosa (Solicitante)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Reserva creada con exito (201)', function () {",
+              "    pm.response.to.have.status(201);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.estadoReserva).to.eql('CONFIRMADA');",
+              "    pm.collectionVariables.set('reservaId', json.id);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenSolicitante}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recursoId\": {{recursoE2EId}},\n  \"usuarioId\": 1,\n  \"fechaHoraInicio\": \"{{fechaInicio1}}\",\n  \"fechaHoraFin\": \"{{fechaFin1}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+      }
+    },
+    {
+      "name": "3. Validar Solapamiento Horario (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Detecta conflicto de solapamiento (409)', function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenSolicitante}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recursoId\": {{recursoE2EId}},\n  \"usuarioId\": 1,\n  \"fechaHoraInicio\": \"{{fechaInicioSolapada}}\",\n  \"fechaHoraFin\": \"{{fechaFinSolapada}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+      }
+    },
+    {
+      "name": "4. Registrar Entrega de Prestamo (Gestor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Prestamo entregado y activo (201)', function () {",
+              "    pm.response.to.have.status(201);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.estadoPrestamo).to.eql('ACTIVO');",
+              "    pm.collectionVariables.set('prestamoId', json.id);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenGestor}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fechaHoraEntrega\": \"{{fechaEntrega}}\",\n  \"fechaHoraLimite\": \"{{fechaLimiteVencida}}\",\n  \"estadoInicial\": \"BUENO\",\n  \"observaciones\": \"Entrega en mostrador\",\n  \"accesorios\": \"Cargador y estuche\",\n  \"recursoId\": {{recursoE2EId}},\n  \"usuarioId\": 1,\n  \"reservaId\": {{reservaId}}\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/prestamos", "host": ["{{baseUrl}}"], "path": ["prestamos"] }
+      }
+    },
+    {
+      "name": "5. Registrar Devolucion Tardia (Gestor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Devolucion registrada con tardanza marcada (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.estadoPrestamo).to.eql('DEVUELTO');",
+              "    pm.expect(json.devolucionTardia).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenGestor}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estadoFinal\": \"REGULAR\",\n  \"observaciones\": \"Entregado fuera de hora con fisura en lente\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/prestamos/{{prestamoId}}/devolucion", "host": ["{{baseUrl}}"], "path": ["prestamos", "{{prestamoId}}", "devolucion"] }
+      }
+    },
+    {
+      "name": "6. Reportar Incidente Critico (Bloquea Recurso)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Incidente critico bloquea el recurso automaticamente (201)', function () {",
+              "    pm.response.to.have.status(201);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.recursoBloqueado).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenSolicitante}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recursoId\": {{recursoE2EId}},\n  \"tipoIncidente\": \"DANO_FISICO\",\n  \"severidadIncidente\": \"CRITICA\",\n  \"descripcion\": \"Fisura critica en el lente tras la devolucion\",\n  \"fecha\": \"{{fechaAhora}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/incidentes", "host": ["{{baseUrl}}"], "path": ["incidentes"] }
+      }
+    },
+    {
+      "name": "7. Rechazar Reserva Sobre Recurso Bloqueado (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Rechaza reserva porque el recurso esta BLOQUEADO (409)', function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenSolicitante}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recursoId\": {{recursoE2EId}},\n  \"usuarioId\": 1,\n  \"fechaHoraInicio\": \"{{fechaInicio2}}\",\n  \"fechaHoraFin\": \"{{fechaFin2}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+      }
+    },
+    {
+      "name": "8. Abrir Mantenimiento (Gestor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Orden de mantenimiento abierta (201)', function () {",
+              "    pm.response.to.have.status(201);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.estadoMantenimiento).to.eql('ABIERTA');",
+              "    pm.collectionVariables.set('mantenimientoId', json.id);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenGestor}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"diagnostico\": \"Reemplazo de lente frontal y calibracion\",\n  \"observaciones\": \"Repuesto en taller\",\n  \"recursoId\": {{recursoE2EId}}\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/mantenimientos", "host": ["{{baseUrl}}"], "path": ["mantenimientos"] }
+      }
+    },
+    {
+      "name": "9. Finalizar Mantenimiento y Habilitar Recurso (Gestor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Mantenimiento finalizado y recurso habilitado (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.estadoMantenimiento).to.eql('FINALIZADA');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{tokenGestor}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/mantenimientos/{{mantenimientoId}}/finalizar?habilitarRecurso=true",
+          "host": ["{{baseUrl}}"],
+          "path": ["mantenimientos", "{{mantenimientoId}}", "finalizar"],
+          "query": [{ "key": "habilitarRecurso", "value": "true" }]
+        }
+      }
+    },
+    {
+      "name": "10. Confirmar Nueva Reserva Tras Habilitacion (Solicitante)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Recurso disponible acepta nueva reserva (201)', function () {",
+              "    pm.response.to.have.status(201);",
+              "    pm.expect(pm.response.json().estadoReserva).to.eql('CONFIRMADA');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tokenSolicitante}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recursoId\": {{recursoE2EId}},\n  \"usuarioId\": 1,\n  \"fechaHoraInicio\": \"{{fechaInicio2}}\",\n  \"fechaHoraFin\": \"{{fechaFin2}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+      }
     }
+  ]
+}
