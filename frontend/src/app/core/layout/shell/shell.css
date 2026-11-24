@@ -43,7 +43,9 @@
 }
 
 .lateral__marca {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0 8px 24px;
   font-size: 1.25rem;
   font-weight: 700;
@@ -83,8 +85,22 @@
 }
 
 .lateral__enlace--activo {
-  background: rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.14);
+  box-shadow: inset 3px 0 0 var(--acento);
   font-weight: 600;
+}
+
+.lateral__logo {
+  width: 36px;
+  height: 42px;
+  padding: 3px;
+}
+
+.barra__logo {
+  width: 26px;
+  height: 30px;
+  padding: 2px;
+  border-radius: 7px;
 }
 
 .lateral__usuario {
@@ -162,6 +178,9 @@
   }
 
   .barra__marca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 700;
   }
 

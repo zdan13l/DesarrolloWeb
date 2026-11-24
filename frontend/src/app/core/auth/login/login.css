@@ -11,13 +11,26 @@
   gap: 16px;
 }
 
+.login__logo {
+  width: 72px;
+  height: 84px;
+  padding: 6px;
+  margin: 0 auto;
+}
+
 .login__marca {
   margin: 0;
   font-size: 1.5rem;
+  text-align: center;
+  color: var(--primary);
 }
 
 .login__formulario p {
   margin: 0;
+}
+
+.login__formulario > .texto-suave {
+  text-align: center;
 }
 
 .login__boton {

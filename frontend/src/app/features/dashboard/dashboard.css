@@ -1,9 +1,9 @@
 /* Colores del tablero: un azul para las barras y la paleta de estado para las fichas. */
 :host {
   display: block;
-  --viz-serie: #2a78d6;
+  --viz-serie: #1a3a5c;
   --viz-base: #c3c2b7;
-  --viz-bueno: #0ca30c;
+  --viz-bueno: #22ae7c;
   --viz-info: #2a78d6;
   --viz-aviso: #fab219;
   --viz-critico: #d03b3b;
@@ -11,7 +11,7 @@
 
 @media (prefers-color-scheme: dark) {
   :host {
-    --viz-serie: #3987e5;
+    --viz-serie: #8fb3dc;
     --viz-base: #383835;
     --viz-info: #3987e5;
   }

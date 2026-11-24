@@ -49,11 +49,13 @@ public class MantenimientoController {
         return mantenimientoService.obtenerPorId(id);
     }
 
-    @Operation(summary = "Abrir mantenimiento")
+    @Operation(summary = "Abrir mantenimiento",
+            description = "Queda en estado ABIERTA y el recurso pasa a BLOQUEADO hasta que se cierre.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Mantenimiento creado"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-        @ApiResponse(responseCode = "404", description = "Recurso inexistente")
+        @ApiResponse(responseCode = "404", description = "Recurso inexistente"),
+        @ApiResponse(responseCode = "409", description = "El recurso está prestado o ya tiene un mantenimiento abierto")
     })
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PostMapping
@@ -62,11 +64,14 @@ public class MantenimientoController {
         return mantenimientoService.crear(dto);
     }
 
-    @Operation(summary = "Actualizar mantenimiento", description = "Permite actualizar el diagnóstico o el estado")
+    @Operation(summary = "Actualizar mantenimiento",
+            description = "Cambia el diagnóstico y las observaciones, o lo pasa de ABIERTA a EN_PROCESO. "
+                    + "Para cerrarlo usa finalizar o cancelar.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Mantenimiento actualizado"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-        @ApiResponse(responseCode = "404", description = "El mantenimiento o el recurso no existe")
+        @ApiResponse(responseCode = "404", description = "El mantenimiento o el recurso no existe"),
+        @ApiResponse(responseCode = "409", description = "Ya está cerrado o el cambio de estado no está permitido")
     })
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PutMapping("/{id}")
@@ -75,10 +80,12 @@ public class MantenimientoController {
         return mantenimientoService.actualizar(id, dto);
     }
 
-    @Operation(summary = "Finalizar mantenimiento")
+    @Operation(summary = "Finalizar mantenimiento",
+            description = "Lo cierra con la fecha actual. Con habilitarRecurso=true el recurso vuelve a estar disponible.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Mantenimiento finalizado"),
-        @ApiResponse(responseCode = "404", description = "El mantenimiento no existe")
+        @ApiResponse(responseCode = "404", description = "El mantenimiento no existe"),
+        @ApiResponse(responseCode = "409", description = "Ya estaba finalizado o cancelado")
     })
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PatchMapping("/{id}/finalizar")
@@ -88,10 +95,12 @@ public class MantenimientoController {
         return mantenimientoService.finalizar(id, habilitarRecurso);
     }
 
-    @Operation(summary = "Cancelar mantenimiento")
+    @Operation(summary = "Cancelar mantenimiento",
+            description = "El recurso sigue bloqueado; se habilita aparte cuando esté listo.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Mantenimiento cancelado"),
-        @ApiResponse(responseCode = "404", description = "El mantenimiento no existe")
+        @ApiResponse(responseCode = "404", description = "El mantenimiento no existe"),
+        @ApiResponse(responseCode = "409", description = "Ya estaba finalizado o cancelado")
     })
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PatchMapping("/{id}/cancelar")
@@ -104,7 +113,7 @@ public class MantenimientoController {
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Mantenimiento eliminado"),
         @ApiResponse(responseCode = "404", description = "El mantenimiento no existe")
-    })  
+    })
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

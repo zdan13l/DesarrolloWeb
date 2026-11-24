@@ -75,7 +75,8 @@ public class UbicacionController {
     @Operation(summary = "Eliminar ubicación")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Ubicación eliminada"),
-        @ApiResponse(responseCode = "404", description = "La ubicación no existe")
+        @ApiResponse(responseCode = "404", description = "La ubicación no existe"),
+        @ApiResponse(responseCode = "409", description = "Todavía tiene recursos asignados")
     })
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")

@@ -1,5 +1,6 @@
 package com.sistema.gestion.sistema_gestion_api.modules.usuario.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +14,7 @@ public record UsuarioRequestDTO(
         @NotBlank(message = "El correo es obligatorio")
         @Email(message = "El correo no tiene un formato valido")
         String correo,
+        @Schema(description = "Obligatoria al crear. Al editar, si no se envía se mantiene la actual.")
         @Size(min = 8, max = 72, message = "La contrasena debe tener entre 8 y 72 caracteres")
         String password,
         boolean activo,

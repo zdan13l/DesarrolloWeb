@@ -76,7 +76,8 @@ public class UsuarioController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Usuario actualizado"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-        @ApiResponse(responseCode = "404", description = "El usuario no existe")
+        @ApiResponse(responseCode = "404", description = "El usuario no existe"),
+        @ApiResponse(responseCode = "409", description = "Otro usuario ya usa ese correo")
     })
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
@@ -88,7 +89,8 @@ public class UsuarioController {
     @Operation(summary = "Eliminar usuario")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Usuario eliminado"),
-        @ApiResponse(responseCode = "404", description = "El usuario no existe")
+        @ApiResponse(responseCode = "404", description = "El usuario no existe"),
+        @ApiResponse(responseCode = "409", description = "Tiene reservas, préstamos o incidentes; mejor desactívalo")
     })
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")

@@ -32,3 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 *.db
+### SPA compilada (se genera con `npm run build` en frontend) ###
+src/main/resources/static/

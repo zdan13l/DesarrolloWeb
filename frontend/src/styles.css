@@ -1,23 +1,25 @@
 /* Variables de color y clases compartidas: botones, tarjetas, formularios y alertas. */
 
 :root {
-  --bg: #f4f6fa;
+  --bg: #f4f6f8;
   --surface: #ffffff;
-  --text: #1b2333;
-  --muted: #566176;
-  --border: #d9dee8;
-  --primary: #12408f;
+  --text: #1a2433;
+  --muted: #556173;
+  --border: #d8dee6;
+  --primary: #1a3a5c;
+  --primary-hover: #12293f;
   --primary-contraste: #ffffff;
-  --primary-soft: #e4ecfa;
-  --ok: #146c43;
-  --ok-soft: #dff3e8;
+  --primary-soft: #e3eaf2;
+  --acento: #22ae7c;
+  --ok: #157a55;
+  --ok-soft: #ddf3ea;
   --warn: #8a5300;
   --warn-soft: #fbeccb;
   --danger: #b3261e;
   --danger-soft: #fbe3e0;
   --neutral-soft: #eceff4;
-  --lateral-fondo: #0d2d63;
-  --lateral-texto: #f3f6fc;
+  --lateral-fondo: #1a3a5c;
+  --lateral-texto: #f2f6fa;
   --ancho-lateral: 248px;
   --radius: 10px;
   color-scheme: light;
@@ -25,22 +27,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121722;
-    --surface: #1b2230;
-    --text: #e8ecf4;
-    --muted: #a3adbf;
-    --border: #2f3a4e;
-    --primary: #7aa5f2;
-    --primary-contraste: #0b1426;
-    --primary-soft: #1d2d4d;
-    --ok: #6fd1a0;
-    --ok-soft: #173a2a;
+    --bg: #10161f;
+    --surface: #18212d;
+    --text: #e6ebf2;
+    --muted: #a2adbd;
+    --border: #2c3848;
+    --primary: #8fb3dc;
+    --primary-hover: #a9c5e6;
+    --primary-contraste: #0d1b2b;
+    --primary-soft: #1c2c41;
+    --acento: #3cc795;
+    --ok: #5ed3a3;
+    --ok-soft: #153528;
     --warn: #f0be63;
     --warn-soft: #3d2f12;
     --danger: #f19b94;
     --danger-soft: #45201d;
     --neutral-soft: #252e3f;
-    --lateral-fondo: #0a1a38;
+    --lateral-fondo: #11263d;
     color-scheme: dark;
   }
 }
@@ -138,6 +142,18 @@ a {
   border-color: var(--primary);
   background: var(--primary);
   color: var(--primary-contraste);
+}
+
+.btn--primario:hover:not(:disabled) {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+
+.logo {
+  display: block;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 10px;
 }
 
 .btn--peligro {

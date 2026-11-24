@@ -69,11 +69,13 @@ public class PrestamoController {
 
 
 
-    @Operation(summary = "Registrar entrega de un equipo")
+    @Operation(summary = "Registrar entrega de un equipo",
+            description = "Parte de una reserva confirmada. El préstamo queda ACTIVO y el recurso PRESTADO.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Entrega registrada"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-            @ApiResponse(responseCode = "404", description = "Recurso, usuario o reserva inexistente")
+            @ApiResponse(responseCode = "404", description = "Recurso, usuario o reserva inexistente"),
+            @ApiResponse(responseCode = "409", description = "El recurso está bloqueado, ya está prestado o no se puede prestar")
     })
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PostMapping
@@ -86,11 +88,14 @@ public class PrestamoController {
 
 
 
-    @Operation(summary = "Registrar devolución de un equipo")
+    @Operation(summary = "Registrar devolución de un equipo",
+            description = "La fecha de devolución es la del momento en que se registra. "
+                    + "Si pasa de la fecha límite, devolucionTardia queda en true. El recurso vuelve a estar disponible.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Devolución registrada"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-            @ApiResponse(responseCode = "404", description = "El préstamo no existe")
+            @ApiResponse(responseCode = "404", description = "El préstamo no existe"),
+            @ApiResponse(responseCode = "409", description = "Ese préstamo ya se había devuelto")
     })
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     @PatchMapping("/{id}/devolucion")

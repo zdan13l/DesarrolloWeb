@@ -36,7 +36,7 @@ Aplicación web de una sola página en `frontend/` que consume la API REST:
 
 El backend en `sistema-gestion-api` está organizado en módulos por dominio y seguridad, cada uno con sus capas de `controller`, `dto`, `model`, `repository` y `service`:
 
-- `auth` y `security`
+- `auth`
 - `categoria`
 - `incidente`
 - `mantenimiento`
@@ -67,12 +67,48 @@ Al iniciar el backend se cargan automáticamente los siguientes usuarios y roles
 
 ## Cómo ejecutar
 
+El backend necesita **Java 21**. Si `java -version` muestra otra versión, apunta `JAVA_HOME` al JDK 21 antes de seguir; con Java 17 falla con `UnsupportedClassVersionError`.
+
+Hay dos formas de levantar el proyecto. En las dos, la base de datos se crea de nuevo con los datos de ejemplo cada vez que arranca el backend.
+
+### Opción 1: desarrollo (dos terminales)
+
+Terminal 1, el backend:
+
 ```bash
 cd sistema-gestion-api
 ./mvnw spring-boot:run
 ```
 
-La API quedará disponible en `http://localhost:8080` y la documentación Swagger UI en `http://localhost:8080/swagger-ui.html`.
+Terminal 2, el frontend:
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+La aplicación se abre en `http://localhost:4200`. Los cambios del frontend se ven al guardar.
+
+### Opción 2: todo desde el backend
+
+Se compila el frontend una vez y el backend lo sirve junto con la API:
+
+```bash
+cd frontend
+npm install
+npm run build
+cd ../sistema-gestion-api
+./mvnw spring-boot:run
+```
+
+La aplicación se abre en `http://localhost:8080`. El resultado de la compilación queda en `sistema-gestion-api/src/main/resources/static` y no se sube al repositorio, así que hay que repetir `npm run build` después de cambiar el frontend.
+
+### Qué hay en el puerto 8080
+
+- `http://localhost:8080/api/...`: la API REST.
+- `http://localhost:8080/swagger-ui.html`: la documentación de la API, donde se puede probar con el botón **Authorize**.
+- `http://localhost:8080/`: la aplicación web, **solo si antes se hizo `npm run build`** (opción 2). Si no, responde 404 y hay que abrir la aplicación en el puerto 4200 (opción 1).
 
 ## Cómo ejecutar las pruebas
 
@@ -98,16 +134,6 @@ npx newman run PontiReservas_E2E.postman_collection.json
 ```
 
 La colección inicia sesión automáticamente con los roles `ADMINISTRADOR`, `SOLICITANTE` y `GESTOR`, y valida el ciclo completo: creación de recurso, reserva, detección de solapamiento horario, entrega de préstamo, devolución tardía, incidente crítico con bloqueo automático, mantenimiento, habilitación del recurso y nueva reserva.
-
-## Cómo ejecutar la SPA
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-La aplicación quedará disponible en `http://localhost:4200` y requiere el backend corriendo en el puerto 8080.
 
 ## Diagrama de navegación
 

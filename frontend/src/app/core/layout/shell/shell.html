@@ -12,11 +12,11 @@
     >
       ☰
     </button>
-    <span class="barra__marca">PontiReservas</span>
+    <span class="barra__marca"><img class="logo barra__logo" src="logo.png" alt="" />PontiReservas</span>
   </header>
 
   <aside id="menu-lateral" class="lateral" [class.lateral--abierto]="menuAbierto()">
-    <a class="lateral__marca" routerLink="/">PontiReservas</a>
+    <a class="lateral__marca" routerLink="/"><img class="logo lateral__logo" src="logo.png" alt="" />PontiReservas</a>
     <nav aria-label="Navegación principal">
       @for (seccion of seccionesVisibles(); track $index) {
         <div class="lateral__seccion">
