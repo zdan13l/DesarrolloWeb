@@ -166,7 +166,3 @@ https://youtu.be/tcBbIMrVMgw?si=NDi8EC16Mej2wrJC
 ## Video de sustentación - Entrega 3
 
 https://youtu.be/f4EfJff_9Oo
-
-## Video de sustentación - Entrega 4
-
-Pendiente enlace del video de sustentación.
