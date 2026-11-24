@@ -108,7 +108,7 @@ public class DataSeeder implements CommandLineRunner {
 
         Recurso proyectorPortatil = recurso("Proyector portátil Epson", TipoRecurso.EQUIPO,
                 "Proyector portátil para préstamo", "HDMI, 3000 lúmenes",
-                ModalidadRecurso.PRESTABLE, EstadoOperativo.DISPONIBLE, catEquipos, bodega);
+                ModalidadRecurso.PRESTABLE, EstadoOperativo.PRESTADO, catEquipos, bodega);
 
         Recurso portatilDell = recurso("Portátil Dell Latitude", TipoRecurso.EQUIPO,
                 "Portátil para préstamo a estudiantes", "Core i5, 8GB RAM",
@@ -122,17 +122,24 @@ public class DataSeeder implements CommandLineRunner {
         reserva(labSistemas, estudiante, ahora.plus(2, ChronoUnit.DAYS),
                 ahora.plus(2, ChronoUnit.DAYS).plus(3, ChronoUnit.HOURS), EstadoReserva.CONFIRMADA);
 
+        // Epson: un préstamo pasado ya devuelto y uno en curso (el recurso queda PRESTADO).
         prestamo(proyectorPortatil, estudiante,
                 ahora.minus(3, ChronoUnit.DAYS), ahora.minus(1, ChronoUnit.DAYS),
                 EstadoPrestamo.DEVUELTO, EstadoFisico.BUENO, EstadoFisico.BUENO,
-                "Sin novedades", "Cable HDMI, control remoto", ahora.minus(1, ChronoUnit.DAYS));
+                "Sin novedades", "Cable HDMI, control remoto", ahora.minus(1, ChronoUnit.DAYS), false);
 
-        prestamo(portatilDell, estudiante,
-                ahora.minus(1, ChronoUnit.DAYS), ahora.plus(1, ChronoUnit.DAYS),
+        prestamo(proyectorPortatil, docente,
+                ahora.minus(12, ChronoUnit.HOURS), ahora.plus(1, ChronoUnit.DAYS),
                 EstadoPrestamo.ACTIVO, EstadoFisico.BUENO, EstadoFisico.BUENO,
-                "Préstamo en curso", "Cargador", null);
+                "Préstamo en curso", "Cable HDMI", null, false);
 
-        incidente(portatilDell, gestor, TipoIncidente.FALLA_FUNCIONAMIENTO,
+        // Dell: devuelto con retraso y dañado; Luis reportó una falla crítica, por eso el recurso quedó BLOQUEADO.
+        prestamo(portatilDell, estudiante,
+                ahora.minus(4, ChronoUnit.DAYS), ahora.minus(2, ChronoUnit.DAYS),
+                EstadoPrestamo.DEVUELTO, EstadoFisico.BUENO, EstadoFisico.DANADO,
+                "Devuelto con retraso; no enciende", "Cargador", ahora.minus(1, ChronoUnit.DAYS), true);
+
+        incidente(portatilDell, estudiante, TipoIncidente.FALLA_FUNCIONAMIENTO,
                 SeveridadIncidente.CRITICA, "El portátil no enciende, posible falla de fuente");
 
         mantenimiento(portatilDell, ahora.minus(1, ChronoUnit.HOURS), null,
@@ -201,7 +208,8 @@ public class DataSeeder implements CommandLineRunner {
 
     private Prestamo prestamo(Recurso recurso, Usuario usuario, Instant entrega, Instant limite,
                                EstadoPrestamo estadoPrestamo, EstadoFisico estadoInicial, EstadoFisico estadoFinal,
-                               String observaciones, String accesorios, Instant devolucion) {
+                               String observaciones, String accesorios, Instant devolucion,
+                               boolean devolucionTardia) {
         Reserva reservaBase = reserva(recurso, usuario, entrega, limite, EstadoReserva.FINALIZADA);
 
         Prestamo p = new Prestamo();
@@ -216,6 +224,7 @@ public class DataSeeder implements CommandLineRunner {
         p.setEstadoFinal(estadoFinal);
         p.setObservaciones(observaciones);
         p.setAccesorios(accesorios);
+        p.setDevolucionTardia(devolucionTardia);
         return prestamoRepository.save(p);
     }
 
@@ -228,6 +237,7 @@ public class DataSeeder implements CommandLineRunner {
         i.setSeveridadIncidente(severidad);
         i.setDescripcion(descripcion);
         i.setFecha(Instant.now());
+        i.setRecursoBloqueado(severidad == SeveridadIncidente.CRITICA);
         return incidenteRepository.save(i);
     }
 
